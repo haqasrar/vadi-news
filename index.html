@@ -42,10 +42,6 @@
         </header>
 
         <div class="container">
-            <div class="mobile-search-container">
-                <input type="text" class="search-input" placeholder="🔍 Search News..." onkeyup="performSearch(this)">
-            </div>
-
             <div class="layout-grid">
                 <main>
                     <div id="hero-main"></div>
@@ -54,11 +50,11 @@
                 </main>
 
                 <aside>
-                    <div class="sidebar-widget desktop-search-widget">
+                    <div class="sidebar-widget">
                         <h3 class="widget-title">Search News</h3>
-                        <div style="position:relative;">
-                            <input type="text" class="search-input" placeholder="Type to search..." onkeyup="performSearch(this)">
-                            <i class="fas fa-search" style="position:absolute; right:15px; top:12px; color:#999;"></i>
+                        <div class="search-box-wrapper">
+                            <input type="text" class="search-input" id="searchInput" placeholder="Type to search..." onkeyup="performSearch(this)">
+                            <i class="fas fa-search search-icon"></i>
                         </div>
                     </div>
 
@@ -74,7 +70,7 @@
                             <img src="images/image.jpeg" class="profile-pic" alt="Faisal">
                             <div class="profile-role">Founder</div>
                             <div class="profile-name">Faisal Khan</div>
-                            <p class="profile-bio">Founder of Vadi-e-Kashmir. Pursuing Automobile Engineering.</p>
+                            <p class="profile-bio">Founder of Vadi-e-Kashmir. Highlighted public grievances with local administration support.</p>
                             <div class="profile-socials">
                                 <a href="https://www.facebook.com/share/14WPeSLnhXg/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
                                 <a href="https://www.instagram.com/driftsoulkhan/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
@@ -86,7 +82,7 @@
                             <img src="images/Asrar.jpg" class="profile-pic" alt="Asrar">
                             <div class="profile-role">Developer</div>
                             <div class="profile-name">Haq Asrar</div>
-                            <p class="profile-bio">Passionate developer creating modern websites and apps.</p>
+                            <p class="profile-bio">Engineering student developing mobile apps and modern websites.</p>
                             <div class="profile-socials">
                                 <a href="https://www.facebook.com/share/181H58vCdm/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
                                 <a href="https://www.instagram.com/koshur.coder/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
@@ -113,9 +109,7 @@
             </div>
         </div>
 
-        <footer>
-            &copy; 2022 Vadi E Kashmir. All Rights Reserved.
-        </footer>
+        <footer>&copy; 2022 Vadi E Kashmir. All Rights Reserved.</footer>
     </div>
 
     <div id="article-page-view" style="display:none;">
