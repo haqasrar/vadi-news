@@ -39,9 +39,9 @@ a { text-decoration: none; color: inherit; transition: 0.3s; }
 ul { list-style: none; }
 img { max-width: 100%; display: block; }
 
-/* --- TICKER (NOW RED) --- */
+/* --- TICKER (RED THEME) --- */
 .ticker-wrap { 
-    background: var(--primary); /* CHANGED TO RED */
+    background: var(--primary); 
     color: #fff; 
     font-size: 0.85rem; 
     padding: 8px 0; 
@@ -78,9 +78,9 @@ header {
 }
 .theme-btn:hover { background: var(--dark); color: var(--light); }
 
-/* --- NAVIGATION (NOW RED) --- */
+/* --- NAVIGATION (RED THEME) --- */
 .nav-wrapper { 
-    background: var(--primary); /* RED BACKGROUND */
+    background: var(--primary); 
     padding: 0; 
 }
 nav { 
@@ -95,7 +95,7 @@ nav a {
     font-weight: 600; 
     font-size: 0.9rem; 
     text-transform: uppercase; 
-    color: white; /* WHITE TEXT */
+    color: white; 
     cursor: pointer; 
     white-space: nowrap; 
     padding: 12px 20px; 
@@ -103,7 +103,7 @@ nav a {
     transition: 0.2s;
 }
 nav a:hover, nav a:active { 
-    background: rgba(0,0,0,0.2); /* DARKER SHADE ON HOVER */
+    background: rgba(0,0,0,0.2); 
     color: white;
 }
 

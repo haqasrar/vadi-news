@@ -24,9 +24,31 @@ document.addEventListener("DOMContentLoaded", function() {
 
 let allNewsData = [];
 
+// --- HELPER: FORMAT DATE (AM/PM) ---
+function formatTime(dateString) {
+    if (!dateString) return "";
+    try {
+        const date = new Date(dateString);
+        // If date is invalid (e.g. manually typed string), return as is
+        if(isNaN(date.getTime())) return dateString;
+
+        // Returns format: "Jan 15, 2026, 1:27 PM"
+        return date.toLocaleString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true 
+        });
+    } catch (e) {
+        return dateString;
+    }
+}
+
 // --- 1. DATA LOADING ---
 async function loadAllData() {
-    // ADS SECTION (Updated for Clickable Links)
+    // ADS SECTION
     try {
         const adDoc = await getDoc(doc(db, "settings", "ads"));
         if (adDoc.exists()) {
@@ -34,19 +56,13 @@ async function loadAllData() {
             const widget = document.getElementById('ad-widget-container');
             
             if(widget) {
-                widget.style.display = 'block'; // Show the widget box
+                widget.style.display = 'block'; 
                 
                 if (adData.type === 'manual') {
-                    // 1. Get the Link (or use # if empty)
                     const targetLink = adData.link || '#';
-                    
-                    // 2. Prepare the Image
                     const imgHtml = `<img src="${adData.img}" style="width:100%; border-radius:8px; display:block; box-shadow:0 2px 5px rgba(0,0,0,0.1);">`;
-                    
-                    // 3. Prepare the Description (Bio)
                     const bioHtml = adData.bio ? `<p style="font-size:0.9rem; color:#333; margin-top:10px; line-height:1.4; font-weight:500;">${formatText(adData.bio)}</p>` : '';
 
-                    // 4. Combine into a CLICKABLE block
                     document.getElementById('ad-content').innerHTML = `
                         <a href="${targetLink}" target="_blank" style="text-decoration:none; display:block; color:inherit; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                             ${imgHtml}
@@ -57,14 +73,13 @@ async function loadAllData() {
                         </a>
                     `;
                 } else {
-                    // For Google Adsense code
                     document.getElementById('ad-content').innerHTML = adData.code;
                 }
             }
         }
     } catch (e) { console.log("Ad load error", e); }
 
-    // NEWS
+    // NEWS SECTION
     try {
         const q = query(collection(db, "news"), orderBy("id", "desc"));
         const querySnapshot = await getDocs(q);
@@ -107,22 +122,20 @@ function loadTheme() {
 
 // --- 3. NAVIGATION & VIEW SWITCHING ---
 window.closeArticle = function() {
-    // Hide Article Page
     document.getElementById('article-page-view').style.display = 'none';
-    // Show Main Content
     document.getElementById('main-content-area').style.display = 'block';
     window.scrollTo(0, 0);
 }
 
 // --- 4. RENDER NEWS LIST ---
 window.filterNews = function(category) {
-    window.closeArticle(); // Ensure we are on home page
+    window.closeArticle(); 
     document.querySelectorAll('.search-input').forEach(input => input.value = "");
     renderNews(category);
 }
 
 window.performSearch = function(el) {
-    window.closeArticle(); // Ensure we are on home page
+    window.closeArticle(); 
     const query = el ? el.value.toLowerCase() : document.querySelector('.search-input').value.toLowerCase();
     renderNews('search', query);
 }
@@ -152,14 +165,24 @@ function renderNews(filterCategory, searchQuery = "") {
         const safeItem = JSON.stringify(i).replace(/'/g, "&#39;");
         const shareOnClick = `shareNews('${i.title.replace(/'/g, "\\'")}', '${img}')`;
         const writerName = i.writer || i.author || "Desk";
+        const formattedDate = formatTime(i.date); // FIX: Uses correct date format
 
+        // Breaking News Ticker
         if(i.type === 'breaking') {
              const link = i.link ? `<a href="${i.link}" target="_blank" style="text-decoration:underline;">${i.title}</a>` : i.title;
              breakHTML += `🔴 ${link} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `;
         }
         
+        // Trending List Sidebar
         if(i.isTrending && tl) {
-            tl.innerHTML += `<li onclick='openArticlePage(${safeItem})' style="margin-bottom:10px; cursor:pointer; font-weight:bold; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:5px;">📈 ${i.title}</li>`;
+            tl.innerHTML += `
+                <li onclick='openArticlePage(${safeItem})' style="display:flex; gap:10px; margin-bottom:15px; cursor:pointer; border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <img src="${img}" style="width:60px; height:60px; object-fit:cover; border-radius:5px;">
+                    <div>
+                        <div style="font-weight:bold; font-size:0.9rem; line-height:1.2;">${i.title}</div>
+                        <div style="font-size:0.7rem; color:var(--primary); margin-top:2px;">Read Story</div>
+                    </div>
+                </li>`;
         }
 
         if(i.type !== 'breaking') {
@@ -169,16 +192,22 @@ function renderNews(filterCategory, searchQuery = "") {
             else if (cat === filterCategory) { match = true; }
 
             if (match) {
+                // Hero Section (First item only)
                 if (filterCategory === 'all' && (index === 0 || i.type === 'hero') && hCount < 1) {
                     if(hCount === 0) {
                         hm.innerHTML = `
-                        <div class="hero-card" onclick='openArticlePage(${safeItem})' style="cursor:pointer;">
+                        <div class="hero-card" onclick='openArticlePage(${safeItem})'>
                             <img src="${img}">
-                            <div class="overlay"><div class="meta">${cat}</div><h2>${i.title}</h2></div>
+                            <div class="overlay">
+                                <span style="background:var(--primary); padding:2px 8px; border-radius:4px; font-size:0.8rem;">${cat}</span>
+                                <h2>${i.title}</h2>
+                                <small>📅 ${formattedDate}</small>
+                            </div>
                         </div>`;
                         hCount++;
                     }
                 } else {
+                    // Standard Grid Items
                     ng.innerHTML += `
                     <div class="news-card-modern">
                         <div class="card-img-wrap" onclick='openArticlePage(${safeItem})'>
@@ -188,10 +217,10 @@ function renderNews(filterCategory, searchQuery = "") {
                             <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
                             <div class="card-footer">
                                 <div style="display:flex; flex-direction:column;">
-                                     <span class="author-name" style="font-weight:bold; color:#d32f2f;">✍️ ${writerName}</span>
-                                     <span class="author-name" style="font-size:0.75em; color:#888;">${i.date ? i.date.split(',')[0] : ''}</span>
+                                     <span class="author-name" style="font-weight:bold; color:var(--primary);">✍️ ${writerName}</span>
+                                     <span class="author-name" style="font-size:0.75em; color:#888;">${formattedDate}</span>
                                 </div>
-                                <button class="share-btn" onclick="${shareOnClick}" style="margin-left:auto;"><i class="fab fa-whatsapp"></i></button>
+                                <button class="share-btn" onclick="${shareOnClick}"><i class="fab fa-whatsapp"></i></button>
                             </div>
                         </div>
                     </div>`;
@@ -206,11 +235,9 @@ function renderNews(filterCategory, searchQuery = "") {
 }
 
 // --- 5. SMART ARTICLE MIXER (TEXT + PHOTOS) ---
-
 function mixTextAndImages(description, galleryImages) {
     if (!description) return "";
     
-    // 1. Split text into paragraphs
     let paragraphs = description.split(/\n\n|\n/);
     if (paragraphs.length < 2) {
         paragraphs = description.match( /[^.!?]+[.!?]+/g ) || [description];
@@ -222,9 +249,8 @@ function mixTextAndImages(description, galleryImages) {
     paragraphs.forEach((para, index) => {
         if(para.trim() === "") return;
         
-        finalHTML += `<p style="margin-bottom:15px; line-height:1.8; font-size:1.1rem; color:#333;">${formatText(para)}</p>`;
+        finalHTML += `<p style="margin-bottom:15px; line-height:1.8; font-size:1.1rem; color:var(--dark);">${formatText(para)}</p>`;
 
-        // Insert image every 2nd paragraph
         if ((index + 1) % 2 === 0 && galleryImages && imageIndex < galleryImages.length) {
             finalHTML += `
                 <div style="margin: 20px 0;">
@@ -237,7 +263,6 @@ function mixTextAndImages(description, galleryImages) {
         }
     });
 
-    // Dump remaining images
     if (galleryImages && imageIndex < galleryImages.length) {
         finalHTML += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">`;
         for (let i = imageIndex; i < galleryImages.length; i++) {
@@ -252,14 +277,15 @@ function mixTextAndImages(description, galleryImages) {
 // --- 6. OPEN ARTICLE PAGE ---
 window.openArticlePage = function(item) {
     document.getElementById('main-content-area').style.display = 'none';
-    
     const page = document.getElementById('article-page-view');
     page.style.display = 'block';
     window.scrollTo(0,0);
 
+    const formattedDate = formatTime(item.date); // FIX: Uses correct date format
+
     const headerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px 0; border-bottom:1px solid #eee; margin-bottom:15px;">
-            <button onclick="closeArticle()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#333;">
+            <button onclick="closeArticle()" style="background:none; border:none; font-size:1.1rem; cursor:pointer; color:var(--dark); display:flex; align-items:center; gap:5px;">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
             <button onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.img}')" 
@@ -278,11 +304,10 @@ window.openArticlePage = function(item) {
     }
 
     const writerName = item.writer || item.author || "Admin";
-    const dateStr = item.date || "";
 
     let contentHTML = "";
     contentHTML += `<div style="margin-bottom:20px;">
-                        <span style="color:#d32f2f; font-weight:bold; font-size:1.1rem;">${writerName} : </span>
+                        <span style="color:var(--primary); font-weight:bold; font-size:1.1rem;">${writerName} : </span>
                     </div>`;
 
     contentHTML += mixTextAndImages(item.desc, item.gallery);
@@ -290,12 +315,10 @@ window.openArticlePage = function(item) {
     document.getElementById('article-container').innerHTML = `
         ${headerHTML}
         ${mediaHTML}
-        <h1 style="font-size:1.8rem; font-weight:bold; line-height:1.3; margin-bottom:10px; color:var(--text);">${item.title}</h1>
+        <h1 style="font-size:1.8rem; font-weight:bold; line-height:1.3; margin-bottom:10px; color:var(--dark);">${item.title}</h1>
         
         <div style="font-size:0.9rem; color:#666; margin-bottom:20px; display:flex; gap:10px; align-items:center;">
-             <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
-             <span>|</span>
-             <span><i class="far fa-clock"></i> ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+             <span><i class="far fa-calendar-alt"></i> ${formattedDate}</span>
         </div>
 
         <div class="article-body">
@@ -355,7 +378,6 @@ function generateDailyMessage() {
         "🤝 Community: United we stand, divided we fall. Help your neighbors.",
         "🩸 Donation: Blood donation is the real act of humanity. Save a life today."
     ];
-    // Uses date to cycle through messages so it changes every day
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
