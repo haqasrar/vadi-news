@@ -159,6 +159,7 @@ function renderNews(filterCategory, searchQuery = "") {
                         hCount++;
                     }
                 } else {
+                    // UPDATED: Added Writer Name here
                     ng.innerHTML += `
                     <div class="news-card-modern">
                         <div class="card-img-wrap" onclick='openModal(${safeItem})'>
@@ -167,8 +168,9 @@ function renderNews(filterCategory, searchQuery = "") {
                         <div class="card-content">
                             <h3 onclick='openModal(${safeItem})'>${i.title}</h3>
                             <div class="card-footer">
-                                <span class="author-name">${i.date ? i.date.split(',')[0] : ''}</span>
-                                <button class="share-btn" onclick="${shareOnClick}"><i class="fab fa-whatsapp"></i> Share</button>
+                                <span class="author-name" style="font-weight:bold; color:#d32f2f;">✍️ ${i.writer || "Admin"}</span>
+                                <span class="author-name" style="margin-left:10px; font-size:0.85em; color:#666;">📅 ${i.date ? i.date.split(',')[0] : ''}</span>
+                                <button class="share-btn" onclick="${shareOnClick}" style="margin-left:auto;"><i class="fab fa-whatsapp"></i> Share</button>
                             </div>
                         </div>
                     </div>`;
@@ -198,14 +200,8 @@ window.shareNews = async function(title, imageUrl) {
     const websiteUrl = window.location.origin;
     const captionText = `${title}\n\nRead more: ${websiteUrl}`;
 
-    // STRATEGY: 
-    // 1. Copy text to clipboard (Because WhatsApp usually drops it)
-    // 2. Open Share Sheet with Image
-    // 3. User pastes text
-
     try {
         await navigator.clipboard.writeText(captionText);
-        // Alert the user so they know what to do
         alert("✅ Caption Copied!\n\n1. Select WhatsApp.\n2. PASTE the text in the caption box.");
     } catch (err) {
         console.log('Clipboard failed', err);
@@ -220,13 +216,11 @@ window.shareNews = async function(title, imageUrl) {
             }
 
             if(filesArray.length > 0 && navigator.canShare({ files: filesArray })) {
-                // Share the IMAGE
                 await navigator.share({
                     files: filesArray,
                     text: captionText 
                 });
             } else {
-                // Share TEXT ONLY (Fallback)
                 await navigator.share({
                     title: 'Vadi E Kashmir',
                     text: captionText,
@@ -237,7 +231,6 @@ window.shareNews = async function(title, imageUrl) {
             console.log('Share closed or failed');
         }
     } else {
-        // Desktop Fallback
         const text = encodeURIComponent(`*${title}*\n\nRead full story here:\n${websiteUrl}`);
         window.open(`https://wa.me/?text=${text}`, '_blank');
     }
@@ -273,7 +266,8 @@ function getEmbedUrl(url) {
 window.openModal = function(item) {
     const m = document.getElementById('newsModal');
     document.getElementById('m-title').innerText = item.title;
-    document.getElementById('m-author').innerText = item.author || "Admin";
+    // UPDATED: Use 'writer' OR 'author' to match your database
+    document.getElementById('m-author').innerText = item.writer || item.author || "Admin";
     document.getElementById('m-date').innerText = item.date;
     document.getElementById('m-desc').innerHTML = formatText(item.desc);
     
