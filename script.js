@@ -89,7 +89,7 @@ function renderNews(filterCategory, searchQuery = "") {
                     <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
                     <div class="card-footer">
                         <span style="color:var(--primary); font-weight:bold;">✍️ ${i.writer || "Admin"}</span>
-                        <button class="share-btn" onclick="shareNews('${i.title.replace(/'/g, "\\'")}', '${i.fbId}')">
+                        <button class="share-btn" onclick="event.stopPropagation(); shareNews('${i.title.replace(/'/g, "\\'")}', '${i.fbId}')">
                             <i class="fab fa-whatsapp"></i>
                         </button>
                     </div>
@@ -99,36 +99,75 @@ function renderNews(filterCategory, searchQuery = "") {
     });
 }
 
-// --- ARTICLE VIEW (FIXES INVISIBLE TEXT) ---
+// --- GALLERY MIXER (Inserts gallery photos into the story) ---
+function mixTextAndImages(description, gallery) {
+    if (!description) return "";
+    let paragraphs = description.split(/\n/);
+    let finalHTML = "";
+    let imgIdx = 0;
+
+    paragraphs.forEach((para, idx) => {
+        if(para.trim() === "") return;
+        finalHTML += `<p style="margin-bottom:15px; color:var(--dark);">${para}</p>`;
+        
+        // Insert a gallery image every 2 paragraphs if they exist
+        if ((idx + 1) % 2 === 0 && gallery && gallery[imgIdx]) {
+            finalHTML += `<img src="${gallery[imgIdx]}" style="width:100%; border-radius:12px; margin:20px 0; box-shadow: var(--shadow);">`;
+            imgIdx++;
+        }
+    });
+
+    // Add remaining images at the end
+    if (gallery && imgIdx < gallery.length) {
+        for (let i = imgIdx; i < gallery.length; i++) {
+            finalHTML += `<img src="${gallery[i]}" style="width:100%; border-radius:12px; margin-bottom:15px; box-shadow: var(--shadow);">`;
+        }
+    }
+    return finalHTML;
+}
+
+// --- ARTICLE VIEW ---
 window.openArticlePage = function(item) {
     document.getElementById('main-content-area').style.display = 'none';
     const page = document.getElementById('article-page-view');
     page.style.display = 'block';
     window.scrollTo(0,0);
 
-    const currentTime = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: true});
+    const currentTime = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
 
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer;"><i class="fas fa-arrow-left"></i> Back</button>
-            <button class="awareness-btn" onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')"><i class="fab fa-whatsapp"></i> Share</button>
+            <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer; font-weight:bold;">
+                <i class="fas fa-arrow-left"></i> BACK
+            </button>
+            <button class="awareness-btn" style="background:#25D366; color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;" 
+                    onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')">
+                <i class="fab fa-whatsapp"></i> SHARE
+            </button>
         </div>
-        <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:15px;">
-        <h1 style="color:var(--dark); margin-bottom:10px;">${item.title}</h1>
+        
+        <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:15px; box-shadow: var(--shadow);">
+        
+        <h1 style="color:var(--dark); margin-bottom:10px; font-family: 'Playfair Display', serif;">${item.title}</h1>
+        
         <div style="font-size:0.8rem; color:var(--gray); margin-bottom:20px;">
             <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${currentTime}
         </div>
-        <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.1rem; white-space:pre-wrap;">
-            <b style="color:var(--primary)">${item.writer || "Admin"} :</b> ${item.desc}
-        </div>`;
+        
+        <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.1rem;">
+            <b style="color:var(--primary)">${item.writer || "Admin"} :</b>
+            ${mixTextAndImages(item.desc, item.gallery)}
+        </div>
+        
+        <div style="height:100px;"></div>`;
 }
 
-// --- SMART SHARING (FIXES IMAGE PREVIEW) ---
+// --- SMART SHARING (Automatic Image Preview) ---
 window.shareNews = function(title, fbId) {
-    // We point to your Next.js domain so WhatsApp finds the Metadata (Image/Title)
+    // Points to Next.js engine for dynamic metadata
     const shareUrl = `https://vadi-news.vercel.app/news/${fbId}`; 
-    const text = encodeURIComponent(`*${title}*\n\nRead full story here:\n${shareUrl}`);
-    window.open(`https://wa.me/?text=${text}`, '_blank');
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
+    window.open(whatsappUrl, '_blank');
 }
 
 window.closeArticle = () => {
@@ -139,7 +178,8 @@ window.closeArticle = () => {
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
     if (!el) return;
-    const msgs = [ "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
+    const msgs = [ 
+         "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
         "💧 Save Water: A drop of water is worth more than a sack of gold to a thirsty man.",
         "🌳 Environment: He that plants a tree loves others beside himself.",
         "🚭 Health: Your body hears everything your mind says. Stay positive, stay healthy.",
@@ -158,7 +198,8 @@ function generateDailyMessage() {
         "🔋 Future: Recycle e-waste. Don't throw batteries in the trash.",
         "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
         "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
-        "🐶 Animals: Be kind to street animals. They feel pain too."];
+        "🐶 Animals: Be kind to street animals. They feel pain too."
+    ];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
