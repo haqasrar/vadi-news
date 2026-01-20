@@ -35,13 +35,13 @@ document.addEventListener("DOMContentLoaded", function() {
     applyCurrentTheme(); // Load theme on home page
 });
 
-// --- MANUAL SHARE ---
+// --- MANUAL SHARE (Clipboard + WhatsApp) ---
 window.shareNews = async (title, fbId) => {
     const shareUrl = `https://vadi-news.vercel.app/news/${fbId}`;
     const fullText = `*${title}*\n\nRead more at:\n${shareUrl}`;
     try {
         await navigator.clipboard.writeText(fullText);
-        alert("✅ Title & Link Copied!\nNow paste it in WhatsApp.");
+        alert("✅ Title & Link Copied!\nNow paste it in WhatsApp description.");
         window.open(`https://wa.me/`, '_blank');
     } catch (err) {
         window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
@@ -65,8 +65,9 @@ async function loadAllData() {
 function renderNews(filterCategory) {
     const hm = document.getElementById('hero-main');
     const ng = document.getElementById('news-grid');
+    const tl = document.getElementById('trending-list');
     if(!ng || !hm) return;
-    ng.innerHTML = ""; hm.innerHTML = "";
+    ng.innerHTML = ""; hm.innerHTML = ""; if(tl) tl.innerHTML = "";
 
     if (allNewsData.length > 0) {
         const topNews = allNewsData[0];
@@ -75,29 +76,38 @@ function renderNews(filterCategory) {
             <div class="hero-card" onclick='openArticlePage(${safeTop})' style="cursor:pointer; width:100%;">
                 <img src="${topNews.img}" style="width:100%; height:100%; object-fit:cover;">
                 <div class="overlay">
-                    <span style="background:var(--primary); padding:2px 8px; border-radius:4px;">${topNews.category}</span>
-                    <h2>${topNews.title}</h2>
+                    <span style="background:var(--primary); padding:2px 8px; border-radius:4px; font-size:0.8rem; font-weight:bold;">${topNews.category}</span>
+                    <h2 style="font-family:'Playfair Display', serif;">${topNews.title}</h2>
                 </div>
             </div>`;
     }
 
-    allNewsData.slice(1).forEach((i) => {
+    allNewsData.forEach((i, index) => {
         const safeItem = JSON.stringify(i).replace(/'/g, "&#39;");
-        ng.innerHTML += `
-            <div class="news-card-modern">
-                <div class="card-img-wrap" onclick='openArticlePage(${safeItem})'>
-                    <img src="${i.img}"><div class="card-tag">${i.category}</div>
-                </div>
-                <div class="card-content">
-                    <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
-                    <div class="card-footer">
-                        <span style="color:var(--primary); font-weight:bold;">✍️ ${i.writer || "Admin"}</span>
-                        <button class="share-btn" onclick="event.stopPropagation(); shareNews('${i.title.replace(/'/g, "\\'")}', '${i.fbId}')">
-                            <i class="fab fa-whatsapp"></i>
-                        </button>
+        
+        // Trending Sidebar logic
+        if(i.isTrending && tl) {
+            tl.innerHTML += `<li onclick='openArticlePage(${safeItem})' style="cursor:pointer; padding:10px 0; border-bottom:1px solid var(--primary-border); font-size:0.9rem; color:var(--dark);">📈 ${i.title}</li>`;
+        }
+
+        // Grid News (skipping the first one as it is in Hero)
+        if(index > 0) {
+            ng.innerHTML += `
+                <div class="news-card-modern">
+                    <div class="card-img-wrap" onclick='openArticlePage(${safeItem})'>
+                        <img src="${i.img}"><div class="card-tag">${i.category}</div>
                     </div>
-                </div>
-            </div>`;
+                    <div class="card-content">
+                        <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
+                        <div class="card-footer">
+                            <span style="color:var(--primary); font-weight:bold; font-size:0.8rem;">✍️ ${i.writer || "Admin"}</span>
+                            <button class="share-btn" onclick="event.stopPropagation(); shareNews('${i.title.replace(/'/g, "\\'")}', '${i.fbId}')">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        }
     });
 }
 
@@ -108,18 +118,17 @@ window.openArticlePage = function(item) {
     page.style.display = 'block';
     window.scrollTo(0,0);
 
-    // FORCE THEME APPLICATION ON NEW PAGE
+    // CRITICAL: Re-apply theme so dark mode doesn't break on the news page
     applyCurrentTheme();
 
     const currentTime = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
 
-    // Fix: Using var(--dark) for color ensures text flips to white in Dark Mode
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-            <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer; font-weight:bold;">
+            <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:5px;">
                 <i class="fas fa-arrow-left"></i> BACK
             </button>
-            <button class="share-btn" style="background:#25D366; color:white; padding:8px 15px; border-radius:20px;" 
+            <button class="share-btn" style="background:#25D366; color:white; padding:8px 18px; border-radius:25px; font-weight:bold; border:none; cursor:pointer;" 
                     onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')">
                 <i class="fab fa-whatsapp"></i> SHARE
             </button>
@@ -127,13 +136,13 @@ window.openArticlePage = function(item) {
         
         <img src="${item.img}" style="width:100%; max-height:450px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow: var(--shadow);">
         
-        <h1 style="color:var(--dark); margin-bottom:10px; font-family: 'Playfair Display', serif;">${item.title}</h1>
+        <h1 style="color:var(--dark); margin-bottom:15px; font-family: 'Playfair Display', serif; line-height:1.2;">${item.title}</h1>
         
-        <div style="font-size:0.85rem; color:var(--primary); margin-bottom:20px; font-weight:bold;">
+        <div style="font-size:0.85rem; color:var(--primary); margin-bottom:20px; font-weight:bold; display:flex; gap:10px; align-items:center;">
             <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${currentTime}
         </div>
 
-        <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.15rem; white-space:pre-wrap;">
+        <div class="article-body" style="color:var(--dark) !important; line-height:1.8; font-size:1.15rem; white-space:pre-wrap;">
             <b style="color:var(--primary)">${item.writer || "Admin"} :</b> ${item.desc}
         </div>
         
@@ -150,5 +159,5 @@ window.toggleTheme = () => {
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'block';
-    applyCurrentTheme(); // Ensure theme stays correct when returning home
+    applyCurrentTheme(); 
 };
