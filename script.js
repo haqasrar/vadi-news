@@ -15,27 +15,29 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- MAIN LOGIC ---
+let allNewsData = [];
+
 document.addEventListener("DOMContentLoaded", function() {
     loadAllData();
-    generateDailyMessage();
     loadTheme();
 });
 
-let allNewsData = [];
-
-// Helper: Format Date to AM/PM
-function formatTime(dateString) {
-    if (!dateString) return "";
+// --- MANUAL SHARE "JUGAAD" ---
+window.shareNews = async (title, fbId) => {
+    const shareUrl = `https://vadi-news.vercel.app/news/${fbId}`;
+    const fullText = `*${title}*\n\nRead more at:\n${shareUrl}`;
+    
     try {
-        const date = new Date(dateString);
-        if(isNaN(date.getTime())) return dateString;
-        return date.toLocaleString('en-US', {
-            year: 'numeric', month: 'short', day: 'numeric',
-            hour: 'numeric', minute: '2-digit', hour12: true 
-        });
-    } catch (e) { return dateString; }
-}
+        // Step 1: Copy to clipboard
+        await navigator.clipboard.writeText(fullText);
+        alert("✅ Title & Link Copied!\nNow paste it in WhatsApp.");
+        
+        // Step 2: Open WhatsApp
+        window.open(`https://wa.me/`, '_blank');
+    } catch (err) {
+        window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
+    }
+};
 
 async function loadAllData() {
     try {
@@ -44,46 +46,40 @@ async function loadAllData() {
         allNewsData = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            data.fbId = doc.id; // Store Firebase ID for sharing
+            data.fbId = doc.id;
             allNewsData.push(data);
         });
         renderNews('all');
-    } catch (error) { console.error("Error loading news:", error); }
+    } catch (error) { console.error("Error:", error); }
 }
 
-// --- THEME ---
-window.toggleTheme = function() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('vadiTheme', isDark ? 'dark' : 'light');
-    const icon = document.querySelector('.theme-btn i');
-    if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-}
-
-function loadTheme() {
-    if(localStorage.getItem('vadiTheme') === 'dark') {
-        document.body.classList.add('dark-mode');
-        const icon = document.querySelector('.theme-btn i');
-        if(icon) icon.className = 'fas fa-sun';
-    }
-}
-
-// --- RENDER & FILTERS ---
-function renderNews(filterCategory, searchQuery = "") {
+function renderNews(filterCategory) {
+    const hm = document.getElementById('hero-main');
     const ng = document.getElementById('news-grid');
-    if(!ng) return;
-    ng.innerHTML = "";
+    if(!ng || !hm) return;
+    ng.innerHTML = ""; hm.innerHTML = "";
 
-    allNewsData.forEach((i) => {
-        const img = i.img || "https://via.placeholder.com/400";
-        const cat = i.category || "News";
+    // Problem 1 Fix: Always take the first item as Top Headline
+    if (allNewsData.length > 0) {
+        const topNews = allNewsData[0];
+        const safeTop = JSON.stringify(topNews).replace(/'/g, "&#39;");
+        hm.innerHTML = `
+            <div class="hero-card" onclick='openArticlePage(${safeTop})' style="cursor:pointer; width:100%;">
+                <img src="${topNews.img}" style="width:100%; height:100%; object-fit:cover;">
+                <div class="overlay">
+                    <span style="background:var(--primary); padding:2px 8px; border-radius:4px;">${topNews.category}</span>
+                    <h2>${topNews.title}</h2>
+                </div>
+            </div>`;
+    }
+
+    // Render the rest in the grid
+    allNewsData.slice(1).forEach((i) => {
         const safeItem = JSON.stringify(i).replace(/'/g, "&#39;");
-        
-        if(i.type !== 'breaking') {
-            ng.innerHTML += `
+        ng.innerHTML += `
             <div class="news-card-modern">
                 <div class="card-img-wrap" onclick='openArticlePage(${safeItem})'>
-                    <img src="${img}"><div class="card-tag">${cat}</div>
+                    <img src="${i.img}"><div class="card-tag">${i.category}</div>
                 </div>
                 <div class="card-content">
                     <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
@@ -95,111 +91,55 @@ function renderNews(filterCategory, searchQuery = "") {
                     </div>
                 </div>
             </div>`;
-        }
     });
 }
 
-// --- GALLERY MIXER (Inserts gallery photos into the story) ---
-function mixTextAndImages(description, gallery) {
-    if (!description) return "";
-    let paragraphs = description.split(/\n/);
-    let finalHTML = "";
-    let imgIdx = 0;
-
-    paragraphs.forEach((para, idx) => {
-        if(para.trim() === "") return;
-        finalHTML += `<p style="margin-bottom:15px; color:var(--dark);">${para}</p>`;
-        
-        // Insert a gallery image every 2 paragraphs if they exist
-        if ((idx + 1) % 2 === 0 && gallery && gallery[imgIdx]) {
-            finalHTML += `<img src="${gallery[imgIdx]}" style="width:100%; border-radius:12px; margin:20px 0; box-shadow: var(--shadow);">`;
-            imgIdx++;
-        }
-    });
-
-    // Add remaining images at the end
-    if (gallery && imgIdx < gallery.length) {
-        for (let i = imgIdx; i < gallery.length; i++) {
-            finalHTML += `<img src="${gallery[i]}" style="width:100%; border-radius:12px; margin-bottom:15px; box-shadow: var(--shadow);">`;
-        }
-    }
-    return finalHTML;
-}
-
-// --- ARTICLE VIEW ---
+// --- ARTICLE VIEW FIXES ---
 window.openArticlePage = function(item) {
     document.getElementById('main-content-area').style.display = 'none';
     const page = document.getElementById('article-page-view');
     page.style.display = 'block';
     window.scrollTo(0,0);
 
-    const currentTime = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
-
+    // Problem 2 Fix: color:var(--dark) ensures text is visible in Dark Mode
+    // img style max-height keeps photos manageable
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer; font-weight:bold;">
                 <i class="fas fa-arrow-left"></i> BACK
             </button>
-            <button class="awareness-btn" style="background:#25D366; color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer;" 
+            <button class="share-btn" style="background:#25D366; color:white; padding:8px 15px; border-radius:20px;" 
                     onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')">
                 <i class="fab fa-whatsapp"></i> SHARE
             </button>
         </div>
         
-        <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:15px; box-shadow: var(--shadow);">
+        <img src="${item.img}" style="width:100%; max-height:450px; object-fit:cover; border-radius:12px; margin-bottom:20px;">
         
-        <h1 style="color:var(--dark); margin-bottom:10px; font-family: 'Playfair Display', serif;">${item.title}</h1>
+        <h1 style="color:var(--dark); margin-bottom:10px;">${item.title}</h1>
         
-        <div style="font-size:0.8rem; color:var(--gray); margin-bottom:20px;">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${currentTime}
+        <div style="font-size:0.85rem; color:var(--primary); margin-bottom:20px;">
+            <i class="far fa-calendar-alt"></i> ${item.date || ""}
+        </div>
+
+        <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.15rem; white-space:pre-wrap;">
+            <b style="color:var(--primary)">${item.writer || "Admin"} :</b> ${item.desc}
         </div>
         
-        <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.1rem;">
-            <b style="color:var(--primary)">${item.writer || "Admin"} :</b>
-            ${mixTextAndImages(item.desc, item.gallery)}
-        </div>
-        
-        <div style="height:100px;"></div>`;
+        <div style="height:100px;"></div>
+    `;
 }
 
-// --- SMART SHARING (Automatic Image Preview) ---
-window.shareNews = function(title, fbId) {
-    // Points to Next.js engine for dynamic metadata
-    const shareUrl = `https://vadi-news.vercel.app/news/${fbId}`; 
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareUrl)}`;
-    window.open(whatsappUrl, '_blank');
+window.toggleTheme = () => {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('vadiTheme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+};
+
+function loadTheme() {
+    if(localStorage.getItem('vadiTheme') === 'dark') document.body.classList.add('dark-mode');
 }
 
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'block';
-}
-
-function generateDailyMessage() {
-    const el = document.getElementById('auto-message');
-    if (!el) return;
-    const msgs = [ 
-         "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
-        "💧 Save Water: A drop of water is worth more than a sack of gold to a thirsty man.",
-        "🌳 Environment: He that plants a tree loves others beside himself.",
-        "🚭 Health: Your body hears everything your mind says. Stay positive, stay healthy.",
-        "⚡ Energy: Energy saved is energy generated. Switch off lights when not in use.",
-        "🚮 Cleanliness: Keep your city clean. Use dustbins and avoid plastic.",
-        "🏥 Health: An apple a day keeps the doctor away. Eat fresh, live long.",
-        "🛑 Traffic: Don't use mobile phones while driving. Your life is precious.",
-        "🤝 Community: United we stand, divided we fall. Help your neighbors.",
-        "🩸 Donation: Blood donation is the real act of humanity. Save a life today.",
-        "🌊 Water: Don't let the water run while you brush your teeth.",
-        "🔥 Safety: Check your gas cylinder regulator before going to bed.",
-        "🧠 Mental Health: It's okay not to be okay. Talk to someone if you feel low.",
-        "🚴 Fitness: Take a walk or ride a bike. Your heart will thank you.",
-        "🎓 Education: Education is the most powerful weapon which you can use to change the world.",
-        "🚦 Rules: Red means stop, Green means go. Respect traffic lights.",
-        "🔋 Future: Recycle e-waste. Don't throw batteries in the trash.",
-        "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
-        "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
-        "🐶 Animals: Be kind to street animals. They feel pain too."
-    ];
-    const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    el.innerHTML = `"${msgs[day % msgs.length]}"`;
-}
+};
