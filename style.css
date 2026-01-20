@@ -26,7 +26,7 @@ header { background: var(--white); box-shadow: var(--shadow); position: sticky; 
 nav { display: flex; justify-content: center; flex-wrap: wrap; }
 nav a { color: white; padding: 15px 20px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; cursor: pointer; }
 
-/* SEARCH BAR */
+/* SEARCH WIDGET */
 .search-box-wrapper { position: relative; display: flex; align-items: center; }
 .search-input { width: 100%; padding: 12px 40px 12px 15px; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; background: var(--light); color: var(--dark); outline: none; }
 .search-icon { position: absolute; right: 15px; color: #999; }
@@ -34,30 +34,27 @@ nav a { color: white; padding: 15px 20px; font-weight: 600; text-transform: uppe
 /* ABOUT TEAM (Horizontal Icons Fix) */
 .profile-section { text-align: center; margin-bottom: 20px; }
 .profile-pic { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--primary); margin: 0 auto 10px; }
-.profile-name { font-weight: bold; color: var(--primary); font-size: 1.1rem; }
 .profile-socials { display: flex; gap: 12px; justify-content: center; margin-top: 15px; }
-.social-icon-btn { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; transition: 0.2s; }
+.social-icon-btn { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
 .fb-bg { background: #3b5998; } .insta-bg { background: #e1306c; } .tw-bg { background: #000; }
 .profile-separator { height: 1px; background: rgba(0,0,0,0.1); margin: 20px 0; }
 
-/* ARTICLE PAGE (Background Fix) */
+/* ARTICLE PAGE (Background & Text Fix) */
 #article-page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light); z-index: 9999; overflow-y: auto; }
 .article-inner { max-width: 800px; margin: 0 auto; padding: 20px; color: var(--dark); }
-.article-body, .article-body * { color: var(--dark) !important; line-height: 1.8; }
+.article-body, .article-body * { color: var(--dark) !important; line-height: 1.8; font-size: 1.15rem; }
 
-/* TICKER */
+/* REST OF CSS (Ticker, Grid, Cards) */
 .ticker-wrap { background: var(--primary); color: white; padding: 10px 0; overflow: hidden; }
 .ticker-content { display: inline-block; white-space: nowrap; animation: ticker 25s linear infinite; padding-left: 100%; }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-/* GRID & CARDS */
 .layout-grid { display: grid; grid-template-columns: 3fr 1fr; gap: 30px; }
 .news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
 .news-card-modern { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); cursor: pointer; }
-.card-img-wrap { position: relative; height: 190px; }
+.card-img-wrap { height: 190px; }
 .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
 .sidebar-widget { background: var(--white); padding: 20px; border-radius: var(--radius); margin-bottom: 25px; box-shadow: var(--shadow); }
 .widget-title { font-size: 1.2rem; border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 15px; }
-.contact-list img { width: 35px; height: 35px; margin-right: 15px; vertical-align: middle; }
 
 @media (max-width: 900px) { .layout-grid { grid-template-columns: 1fr; } }

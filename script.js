@@ -30,7 +30,7 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA LOAD ---
+// --- DATA ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
@@ -60,11 +60,11 @@ function renderNews(category) {
     });
 }
 
-// --- SEARCH & NAVIGATION ---
+// --- SEARCH ---
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
     document.getElementById('hero-main').innerHTML = "";
-    document.getElementById('feed-title').innerText = `Search: "${term}"`;
+    document.getElementById('feed-title').innerText = `Search Results: "${term}"`;
     const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
     const ng = document.getElementById('news-grid');
     ng.innerHTML = filtered.map(n => {
