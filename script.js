@@ -30,13 +30,13 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA & RENDER ---
+// --- DATA ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         renderNews('all');
-    } catch (e) { console.error("Firebase load error", e); }
+    } catch (e) { console.error("Firebase error", e); }
 }
 
 function renderNews(category) {
@@ -46,7 +46,6 @@ function renderNews(category) {
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
     const filtered = category === 'all' ? allNewsData : allNewsData.filter(n => n.category === category);
-    
     ticker.innerHTML = allNewsData.slice(0, 5).map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
 
     if (category === 'all' && filtered.length > 0) {
@@ -61,7 +60,7 @@ function renderNews(category) {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
-        // FIXED: Now specifically using n.writer and n.date from Firebase
+        // DYNAMIC WRITER: Using n.writer from your database portal
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
@@ -69,7 +68,7 @@ function renderNews(category) {
                     <h3>${n.title}</h3>
                     <div class="card-footer">
                         <span>✍️ ${n.writer || "Vadi News"}</span>
-                        <span>📅 ${n.date || "Recent"}</span>
+                        <span>📅 ${n.date || ""}</span>
                     </div>
                 </div>
             </div>`;
@@ -88,16 +87,12 @@ window.filterNews = (cat) => {
 
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
-    const hm = document.getElementById('hero-main');
-    hm.innerHTML = ""; 
+    document.getElementById('hero-main').innerHTML = ""; 
     document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
     const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
-    renderSearchResults(filtered);
-};
-
-function renderSearchResults(results) {
+    
     const ng = document.getElementById('news-grid');
-    ng.innerHTML = results.map(n => {
+    ng.innerHTML = filtered.map(n => {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         return `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
@@ -106,12 +101,12 @@ function renderSearchResults(results) {
                     <h3>${n.title}</h3>
                     <div class="card-footer">
                         <span>✍️ ${n.writer || "Vadi News"}</span>
-                        <span>📅 ${n.date || "Recent"}</span>
+                        <span>📅 ${n.date || ""}</span>
                     </div>
                 </div>
             </div>`;
     }).join("");
-}
+};
 
 // --- ARTICLE VIEW ---
 window.openArticlePage = (item) => {
