@@ -17,22 +17,31 @@ const db = getFirestore(app);
 
 let allNewsData = [];
 
+// --- THEME ENGINE (Master Switch) ---
+function applyCurrentTheme() {
+    const isDark = localStorage.getItem('vadiTheme') === 'dark';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    // Update the Moon/Sun icon
+    const icon = document.querySelector('.theme-btn i');
+    if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     loadAllData();
-    loadTheme();
+    applyCurrentTheme(); // Load theme on home page
 });
 
-// --- MANUAL SHARE "JUGAAD" ---
+// --- MANUAL SHARE ---
 window.shareNews = async (title, fbId) => {
     const shareUrl = `https://vadi-news.vercel.app/news/${fbId}`;
     const fullText = `*${title}*\n\nRead more at:\n${shareUrl}`;
-    
     try {
-        // Step 1: Copy to clipboard
         await navigator.clipboard.writeText(fullText);
         alert("✅ Title & Link Copied!\nNow paste it in WhatsApp.");
-        
-        // Step 2: Open WhatsApp
         window.open(`https://wa.me/`, '_blank');
     } catch (err) {
         window.open(`https://wa.me/?text=${encodeURIComponent(fullText)}`, '_blank');
@@ -59,7 +68,6 @@ function renderNews(filterCategory) {
     if(!ng || !hm) return;
     ng.innerHTML = ""; hm.innerHTML = "";
 
-    // Problem 1 Fix: Always take the first item as Top Headline
     if (allNewsData.length > 0) {
         const topNews = allNewsData[0];
         const safeTop = JSON.stringify(topNews).replace(/'/g, "&#39;");
@@ -73,7 +81,6 @@ function renderNews(filterCategory) {
             </div>`;
     }
 
-    // Render the rest in the grid
     allNewsData.slice(1).forEach((i) => {
         const safeItem = JSON.stringify(i).replace(/'/g, "&#39;");
         ng.innerHTML += `
@@ -94,15 +101,19 @@ function renderNews(filterCategory) {
     });
 }
 
-// --- ARTICLE VIEW FIXES ---
+// --- ARTICLE VIEW (FIXES DARK THEME & INVISIBLE TEXT) ---
 window.openArticlePage = function(item) {
     document.getElementById('main-content-area').style.display = 'none';
     const page = document.getElementById('article-page-view');
     page.style.display = 'block';
     window.scrollTo(0,0);
 
-    // Problem 2 Fix: color:var(--dark) ensures text is visible in Dark Mode
-    // img style max-height keeps photos manageable
+    // FORCE THEME APPLICATION ON NEW PAGE
+    applyCurrentTheme();
+
+    const currentTime = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
+
+    // Fix: Using var(--dark) for color ensures text flips to white in Dark Mode
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); cursor:pointer; font-weight:bold;">
@@ -114,12 +125,12 @@ window.openArticlePage = function(item) {
             </button>
         </div>
         
-        <img src="${item.img}" style="width:100%; max-height:450px; object-fit:cover; border-radius:12px; margin-bottom:20px;">
+        <img src="${item.img}" style="width:100%; max-height:450px; object-fit:cover; border-radius:12px; margin-bottom:20px; box-shadow: var(--shadow);">
         
-        <h1 style="color:var(--dark); margin-bottom:10px;">${item.title}</h1>
+        <h1 style="color:var(--dark); margin-bottom:10px; font-family: 'Playfair Display', serif;">${item.title}</h1>
         
-        <div style="font-size:0.85rem; color:var(--primary); margin-bottom:20px;">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""}
+        <div style="font-size:0.85rem; color:var(--primary); margin-bottom:20px; font-weight:bold;">
+            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${currentTime}
         </div>
 
         <div class="article-body" style="color:var(--dark); line-height:1.8; font-size:1.15rem; white-space:pre-wrap;">
@@ -131,15 +142,13 @@ window.openArticlePage = function(item) {
 }
 
 window.toggleTheme = () => {
-    document.body.classList.toggle('dark-mode');
-    localStorage.setItem('vadiTheme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    const isDark = !document.body.classList.contains('dark-mode');
+    localStorage.setItem('vadiTheme', isDark ? 'dark' : 'light');
+    applyCurrentTheme();
 };
-
-function loadTheme() {
-    if(localStorage.getItem('vadiTheme') === 'dark') document.body.classList.add('dark-mode');
-}
 
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'block';
+    applyCurrentTheme(); // Ensure theme stays correct when returning home
 };
