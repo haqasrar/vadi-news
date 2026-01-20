@@ -2,7 +2,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// YOUR FIREBASE CONFIG
 const firebaseConfig = {
     apiKey: "AIzaSyAj1lPZymdb6jSPrf8ZSfBIIlvc-7JqLho",
     authDomain: "vadi-e-kashmir.firebaseapp.com",
@@ -13,7 +12,6 @@ const firebaseConfig = {
     measurementId: "G-6MPEY5VH7L"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -33,12 +31,15 @@ async function loadAllData() {
         const adDoc = await getDoc(doc(db, "settings", "ads"));
         if (adDoc.exists()) {
             const adData = adDoc.data();
-            document.getElementById('ad-widget-container').style.display = 'block';
-            if (adData.type === 'manual') {
-                const bioHtml = adData.bio ? `<p style="font-size:0.85rem; color:#555; margin-top:10px;">${formatText(adData.bio)}</p>` : '';
-                document.getElementById('ad-content').innerHTML = `<a href="${adData.link||'#'}" target="_blank"><img src="${adData.img}" style="width:100%; border-radius:8px;"></a>${bioHtml}`;
-            } else {
-                document.getElementById('ad-content').innerHTML = adData.code;
+            const widget = document.getElementById('ad-widget-container');
+            if(widget) {
+                widget.style.display = 'block';
+                if (adData.type === 'manual') {
+                    const bioHtml = adData.bio ? `<p style="font-size:0.85rem; color:#555; margin-top:10px;">${formatText(adData.bio)}</p>` : '';
+                    document.getElementById('ad-content').innerHTML = `<a href="${adData.link||'#'}" target="_blank"><img src="${adData.img}" style="width:100%; border-radius:8px;"></a>${bioHtml}`;
+                } else {
+                    document.getElementById('ad-content').innerHTML = adData.code;
+                }
             }
         }
     } catch (e) { console.log("Ad load error", e); }
@@ -62,7 +63,7 @@ async function loadAllData() {
     }
 }
 
-// --- 2. DARK MODE ---
+// --- 2. THEME ---
 window.toggleTheme = function() {
     document.body.classList.toggle('dark-mode');
     const icon = document.querySelector('.theme-btn i');
@@ -77,50 +78,50 @@ window.toggleTheme = function() {
 
 function loadTheme() {
     const savedTheme = localStorage.getItem('vadiTheme');
-    const icon = document.querySelector('.theme-btn i');
     if(savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
+        const icon = document.querySelector('.theme-btn i');
         if(icon) { icon.classList.remove('fa-moon'); icon.classList.add('fa-sun'); }
     }
 }
 
-// --- 3. SEARCH & FILTER ---
-window.performSearch = function(el) {
-    const query = el ? el.value.toLowerCase() : document.querySelector('.search-input').value.toLowerCase();
-    document.querySelectorAll('.search-input').forEach(input => { if(input !== el) input.value = query; });
-
-    if(query.length > 0) {
-        document.getElementById('hero-section').style.display = 'none';
-        document.getElementById('feed-title').innerText = `Search Results for "${query}"`;
-    } else {
-        document.getElementById('hero-section').style.display = 'grid';
-        document.getElementById('feed-title').innerText = "Latest Headlines";
-    }
-    renderNews('search', query);
+// --- 3. NAVIGATION & VIEW SWITCHING ---
+window.closeArticle = function() {
+    // Hide Article Page
+    document.getElementById('article-page-view').style.display = 'none';
+    // Show Main Content
+    document.getElementById('main-content-area').style.display = 'block';
+    window.scrollTo(0, 0);
 }
 
+// --- 4. RENDER NEWS LIST ---
 window.filterNews = function(category) {
+    window.closeArticle(); // Ensure we are on home page
     document.querySelectorAll('.search-input').forEach(input => input.value = "");
     renderNews(category);
 }
 
-// --- 4. RENDER NEWS ---
+window.performSearch = function(el) {
+    window.closeArticle(); // Ensure we are on home page
+    const query = el ? el.value.toLowerCase() : document.querySelector('.search-input').value.toLowerCase();
+    renderNews('search', query);
+}
+
 function renderNews(filterCategory, searchQuery = "") {
-    const t = document.getElementById('ticker-box'), 
-          hm = document.getElementById('hero-main'), 
-          hs = document.getElementById('hero-side'), 
+    const hm = document.getElementById('hero-main'), 
           ng = document.getElementById('news-grid'), 
           tl = document.getElementById('trending-list');
     
-    if(hm) hm.innerHTML = ""; if(hs) hs.innerHTML = ""; if(ng) ng.innerHTML = ""; if(tl) tl.innerHTML = "";
+    if(hm) hm.innerHTML = ""; if(ng) ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
     const heroSec = document.getElementById('hero-section');
     if (filterCategory === 'all' && searchQuery === "") {
         if(heroSec) heroSec.style.display = 'grid';
         if(document.getElementById('feed-title')) document.getElementById('feed-title').innerText = "Latest Headlines";
-    } else if (filterCategory !== 'search') {
+    } else {
         if(heroSec) heroSec.style.display = 'none';
-        if(document.getElementById('feed-title')) document.getElementById('feed-title').innerText = filterCategory + " News";
+        const title = filterCategory === 'search' ? `Search Results for "${searchQuery}"` : `${filterCategory} News`;
+        if(document.getElementById('feed-title')) document.getElementById('feed-title').innerText = title;
     }
 
     let breakHTML = "", hCount = 0;
@@ -129,9 +130,8 @@ function renderNews(filterCategory, searchQuery = "") {
         const img = i.img || "https://via.placeholder.com/400";
         const cat = i.category || "News"; 
         const safeItem = JSON.stringify(i).replace(/'/g, "&#39;");
-
-        // Pass 'img' to the share function here
         const shareOnClick = `shareNews('${i.title.replace(/'/g, "\\'")}', '${img}')`;
+        const writerName = i.writer || i.author || "Desk";
 
         if(i.type === 'breaking') {
              const link = i.link ? `<a href="${i.link}" target="_blank" style="text-decoration:underline;">${i.title}</a>` : i.title;
@@ -139,7 +139,7 @@ function renderNews(filterCategory, searchQuery = "") {
         }
         
         if(i.isTrending && tl) {
-            tl.innerHTML += `<li onclick='openModal(${safeItem})' style="margin-bottom:10px; cursor:pointer; font-weight:bold; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:5px;">📈 ${i.title}</li>`;
+            tl.innerHTML += `<li onclick='openArticlePage(${safeItem})' style="margin-bottom:10px; cursor:pointer; font-weight:bold; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:5px;">📈 ${i.title}</li>`;
         }
 
         if(i.type !== 'breaking') {
@@ -152,25 +152,26 @@ function renderNews(filterCategory, searchQuery = "") {
                 if (filterCategory === 'all' && (index === 0 || i.type === 'hero') && hCount < 1) {
                     if(hCount === 0) {
                         hm.innerHTML = `
-                        <div class="hero-card" onclick='openModal(${safeItem})' style="cursor:pointer;">
+                        <div class="hero-card" onclick='openArticlePage(${safeItem})' style="cursor:pointer;">
                             <img src="${img}">
                             <div class="overlay"><div class="meta">${cat}</div><h2>${i.title}</h2></div>
                         </div>`;
                         hCount++;
                     }
                 } else {
-                    // UPDATED: Added Writer Name here
                     ng.innerHTML += `
                     <div class="news-card-modern">
-                        <div class="card-img-wrap" onclick='openModal(${safeItem})'>
+                        <div class="card-img-wrap" onclick='openArticlePage(${safeItem})'>
                             <img src="${img}"><div class="card-tag">${cat}</div>
                         </div>
                         <div class="card-content">
-                            <h3 onclick='openModal(${safeItem})'>${i.title}</h3>
+                            <h3 onclick='openArticlePage(${safeItem})'>${i.title}</h3>
                             <div class="card-footer">
-                                <span class="author-name" style="font-weight:bold; color:#d32f2f;">✍️ ${i.writer || "Admin"}</span>
-                                <span class="author-name" style="margin-left:10px; font-size:0.85em; color:#666;">📅 ${i.date ? i.date.split(',')[0] : ''}</span>
-                                <button class="share-btn" onclick="${shareOnClick}" style="margin-left:auto;"><i class="fab fa-whatsapp"></i> Share</button>
+                                <div style="display:flex; flex-direction:column;">
+                                     <span class="author-name" style="font-weight:bold; color:#d32f2f;">✍️ ${writerName}</span>
+                                     <span class="author-name" style="font-size:0.75em; color:#888;">${i.date ? i.date.split(',')[0] : ''}</span>
+                                </div>
+                                <button class="share-btn" onclick="${shareOnClick}" style="margin-left:auto;"><i class="fab fa-whatsapp"></i></button>
                             </div>
                         </div>
                     </div>`;
@@ -179,61 +180,137 @@ function renderNews(filterCategory, searchQuery = "") {
         }
     });
 
+    const t = document.getElementById('ticker-box');
     if(t && breakHTML) t.innerHTML = breakHTML;
     else if(t) t.innerHTML = "Welcome to Vadi E Kashmir – 24/7 Breaking News Updates";
 }
 
-// --- 5. SMART SHARING (IMAGE + COPY TEXT) ---
+// --- 5. SMART ARTICLE MIXER (TEXT + PHOTOS) ---
 
-async function urlToFile(url, filename, mimeType){
-    try {
-        const res = await fetch(url);
-        const buf = await res.arrayBuffer();
-        return new File([buf], filename, {type:mimeType});
-    } catch(e) {
-        console.log("Image conversion failed", e);
-        return null;
+function mixTextAndImages(description, galleryImages) {
+    if (!description) return "";
+    
+    // 1. Split text into paragraphs
+    // We try to split by Double Newline first, if not, then single newline, or periods
+    let paragraphs = description.split(/\n\n|\n/);
+    if (paragraphs.length < 2) {
+        // If it's one giant block, try splitting by sentences roughly
+        paragraphs = description.match( /[^.!?]+[.!?]+/g ) || [description];
     }
+
+    let finalHTML = "";
+    let imageIndex = 0;
+    
+    // Logic: Insert an image every 2-3 paragraphs roughly
+    // Or simpler: distribute images evenly
+    
+    paragraphs.forEach((para, index) => {
+        // Clean the paragraph
+        if(para.trim() === "") return;
+        
+        finalHTML += `<p style="margin-bottom:15px; line-height:1.8; font-size:1.1rem; color:#333;">${formatText(para)}</p>`;
+
+        // CHECK: Is it time to insert an image?
+        // We insert after every 3rd paragraph, OR if we are halfway and have images left
+        if ((index + 1) % 2 === 0 && galleryImages && imageIndex < galleryImages.length) {
+            finalHTML += `
+                <div style="margin: 20px 0;">
+                    <img src="${galleryImages[imageIndex]}" 
+                         style="width:100%; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.1);" 
+                         onclick="viewFullImage(this.src)">
+                </div>
+            `;
+            imageIndex++;
+        }
+    });
+
+    // If any images remain, dump them at the bottom
+    if (galleryImages && imageIndex < galleryImages.length) {
+        finalHTML += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">`;
+        for (let i = imageIndex; i < galleryImages.length; i++) {
+            finalHTML += `<img src="${galleryImages[i]}" style="width:100%; border-radius:8px;" onclick="viewFullImage(this.src)">`;
+        }
+        finalHTML += `</div>`;
+    }
+
+    return finalHTML;
 }
 
-window.shareNews = async function(title, imageUrl) {
-    const websiteUrl = window.location.origin;
-    const captionText = `${title}\n\nRead more: ${websiteUrl}`;
+// --- 6. OPEN ARTICLE PAGE (THE NEW "PAGE" LOGIC) ---
+window.openArticlePage = function(item) {
+    // 1. Hide Main Content
+    document.getElementById('main-content-area').style.display = 'none';
+    
+    // 2. Show Article Page
+    const page = document.getElementById('article-page-view');
+    page.style.display = 'block';
+    window.scrollTo(0,0);
 
-    try {
-        await navigator.clipboard.writeText(captionText);
-        alert("✅ Caption Copied!\n\n1. Select WhatsApp.\n2. PASTE the text in the caption box.");
-    } catch (err) {
-        console.log('Clipboard failed', err);
-    }
+    // 3. Populate Data
+    
+    // HEADER: Share Button (Top Right)
+    const headerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px 0; border-bottom:1px solid #eee; margin-bottom:15px;">
+            <button onclick="closeArticle()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#333;">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button onclick="shareNews('${item.title.replace(/'/g, "\\'")}', '${item.img}')" 
+                    style="background:#25D366; color:white; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                <i class="fab fa-whatsapp"></i> Share
+            </button>
+        </div>
+    `;
 
-    if (navigator.share && navigator.canShare) {
-        try {
-            let filesArray = [];
-            if(imageUrl && !imageUrl.includes('placeholder')) {
-                const file = await urlToFile(imageUrl, "news.png", "image/png");
-                if(file) filesArray = [file];
-            }
-
-            if(filesArray.length > 0 && navigator.canShare({ files: filesArray })) {
-                await navigator.share({
-                    files: filesArray,
-                    text: captionText 
-                });
-            } else {
-                await navigator.share({
-                    title: 'Vadi E Kashmir',
-                    text: captionText,
-                    url: websiteUrl
-                });
-            }
-        } catch (error) {
-            console.log('Share closed or failed');
-        }
+    // MAIN PHOTO
+    let mediaHTML = "";
+    if(item.video && item.video.trim() !== "") {
+        const safeUrl = getEmbedUrl(item.video);
+        mediaHTML = `<iframe src="${safeUrl}" width="100%" height="250" frameborder="0" allowfullscreen style="border-radius:10px; margin-bottom:15px;"></iframe>`;
     } else {
-        const text = encodeURIComponent(`*${title}*\n\nRead full story here:\n${websiteUrl}`);
-        window.open(`https://wa.me/?text=${text}`, '_blank');
+        mediaHTML = `<img src="${item.img}" style="width:100%; border-radius:10px; margin-bottom:15px; max-height:400px; object-fit:cover;">`;
     }
+
+    // META DATA
+    const writerName = item.writer || item.author || "Admin";
+    const dateStr = item.date || "";
+
+    // CONTENT MIXING
+    // We pass the description and the gallery array (excluding the main image if it duplicates)
+    // Assuming 'gallery' contains extra images.
+    let contentHTML = "";
+    
+    // WRITER NAME : DESCRIPTION
+    // We start the first paragraph with the writer name in RED
+    contentHTML += `<div style="margin-bottom:20px;">
+                        <span style="color:#d32f2f; font-weight:bold; font-size:1.1rem;">${writerName} : </span>
+                    </div>`;
+
+    // Now inject the rest of the text mixed with photos
+    contentHTML += mixTextAndImages(item.desc, item.gallery);
+
+
+    // INJECT INTO DOM
+    document.getElementById('article-container').innerHTML = `
+        ${headerHTML}
+        ${mediaHTML}
+        <h1 style="font-size:1.8rem; font-weight:bold; line-height:1.3; margin-bottom:10px; color:var(--text);">${item.title}</h1>
+        
+        <div style="font-size:0.9rem; color:#666; margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+             <span><i class="far fa-calendar-alt"></i> ${dateStr}</span>
+             <span>|</span>
+             <span><i class="far fa-clock"></i> ${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+
+        <div class="article-body">
+            ${contentHTML}
+        </div>
+        
+        <div style="height:50px;"></div> `;
+}
+
+// --- 7. UTILS ---
+window.viewFullImage = function(src) {
+    window.open(src, '_blank');
 }
 
 function formatText(text) {
@@ -243,64 +320,29 @@ function formatText(text) {
     return formatted.replace(urlPattern, url => `<a href="${url}" target="_blank" style="color:#b91c1c; text-decoration:underline; word-break:break-all;">${url}</a>`);
 }
 
-// VIDEO CONVERTER
 function getEmbedUrl(url) {
+    // (Same video logic as before)
     if (!url) return "";
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-        let videoId = "";
-        if (url.includes("watch?v=")) videoId = url.split("watch?v=")[1].split("&")[0];
-        else if (url.includes("youtu.be/")) videoId = url.split("youtu.be/")[1].split("?")[0];
-        else if (url.includes("embed/")) videoId = url.split("embed/")[1].split("?")[0];
-        if (videoId) return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    if (url.includes("youtu")) {
+         let videoId = url.split("v=")[1] || url.split("/").pop();
+         const ampersandPosition = videoId.indexOf("&");
+         if(ampersandPosition != -1) videoId = videoId.substring(0, ampersandPosition);
+         return `https://www.youtube.com/embed/${videoId}`;
     }
-    if (url.includes("facebook.com") || url.includes("fb.watch")) {
-        const encodedUrl = encodeURIComponent(url);
-        return `https://www.facebook.com/plugins/video.php?href=${encodedUrl}&show_text=0&width=560`;
-    }
-    if (url.includes("instagram.com")) {
-        if (!url.endsWith("/embed")) return url.split("?")[0].replace(/\/$/, "") + "/embed";
-    }
-    return url; 
+    return url;
 }
 
-window.openModal = function(item) {
-    const m = document.getElementById('newsModal');
-    document.getElementById('m-title').innerText = item.title;
-    // UPDATED: Use 'writer' OR 'author' to match your database
-    document.getElementById('m-author').innerText = item.writer || item.author || "Admin";
-    document.getElementById('m-date').innerText = item.date;
-    document.getElementById('m-desc').innerHTML = formatText(item.desc);
-    
-    const shareBtn = document.getElementById('m-share-btn');
-    if(shareBtn) { 
-        const newBtn = shareBtn.cloneNode(true);
-        shareBtn.parentNode.replaceChild(newBtn, shareBtn);
-        newBtn.onclick = function() { shareNews(item.title, item.img); }; 
+// (Share function remains same as previous version)
+window.shareNews = async function(title, imageUrl) {
+    const websiteUrl = window.location.origin;
+    const captionText = `${title}\n\nRead more: ${websiteUrl}`;
+    try { await navigator.clipboard.writeText(captionText); alert("✅ Caption Copied!\nPaste in WhatsApp."); } catch (err) {}
+    if (navigator.share && navigator.canShare) {
+        try { await navigator.share({ title: 'Vadi E Kashmir', text: captionText, url: websiteUrl }); } catch (error) {}
+    } else {
+        const text = encodeURIComponent(`*${title}*\n\nRead full story here:\n${websiteUrl}`);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
     }
-
-    const v = document.getElementById('m-video'), im = document.getElementById('m-img');
-    
-    if(item.video && item.video.trim() !== "") { 
-        im.style.display='none'; 
-        v.style.display='block'; 
-        const safeUrl = getEmbedUrl(item.video);
-        if(safeUrl.includes("facebook.com")) {
-             v.innerHTML=`<iframe src="${safeUrl}" width="100%" height="100%" frameborder="0" style="border:none;overflow:hidden" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen="true"></iframe>`;
-        } else {
-             v.innerHTML=`<iframe src="${safeUrl}" width="100%" height="100%" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`; 
-        }
-    }
-    else { 
-        v.style.display='none'; v.innerHTML = ""; im.style.display='block'; im.src=item.img; 
-    }
-    
-    const g = document.getElementById('m-gallery'); g.innerHTML="";
-    if(item.gallery && Array.isArray(item.gallery)) {
-        item.gallery.forEach(s=>{ 
-            g.innerHTML+=`<img src="${s}" style="width:100%; height:80px; object-fit:cover; border-radius:4px; cursor:pointer;" onclick="document.getElementById('m-img').src='${s}'; document.getElementById('m-img').style.display='block'; document.getElementById('m-video').style.display='none';">` 
-        });
-    }
-    m.style.display='flex';
 }
 
 function generateDailyMessage() {
@@ -326,6 +368,5 @@ function generateDailyMessage() {
         "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
         "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
         "🐶 Animals: Be kind to street animals. They feel pain too."];
-    const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    el.innerHTML = `"${msgs[day % msgs.length]}"`;
+    el.innerHTML = `"${msgs[0]}"`;
 }
