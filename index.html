@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vadi E Kashmir</title>
+    
+    <meta property="og:title" content="Vadi E Kashmir - Latest News">
+    <meta property="og:description" content="Read the latest updates from J&K, Nation, Business and more.">
+    <meta property="og:image" content="https://vediekashmir.netlify.app/images/Logo.png"> 
+    <meta property="og:url" content="https://vediekashmir.netlify.app">
+    <meta property="og:type" content="website">
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="ticker-wrap">
+        <div class="ticker-content" id="ticker-box">Loading updates...</div>
+    </div>
+
+    <header>
+        <div class="header-top">
+            <div class="brand-area">
+                <img src="images/Logo.png" class="main-logo" alt="Logo" onerror="this.src='https://via.placeholder.com/50'">
+                <div class="logo-text">VADI <span>E KASHMIR</span></div>
+            </div>
+
+            <button class="theme-btn" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+
+        <div class="nav-wrapper">
+            <nav>
+                <a onclick="filterNews('all')"><i class="fas fa-home"></i> Home</a>
+                <a onclick="filterNews('J & K')">J & K</a>
+                <a onclick="filterNews('Nation')">Nation</a>
+                <a onclick="filterNews('Updates')">Updates</a>
+                <a onclick="filterNews('Business')">Business</a>
+            </nav>
+        </div>
+    </header>
+
+    <div id="dailyModal" class="awareness-modal">
+        <div class="awareness-box">
+            <h2 style="color:var(--primary)">📢 Notice</h2>
+            <p id="dailyText" style="font-size:1.2rem; margin:15px 0;">Loading...</p>
+            <div class="awareness-btn" onclick="document.getElementById('dailyModal').style.display='none'">Close</div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div class="mobile-search-container">
+            <input type="text" class="search-input" placeholder="🔍 Search News..." onkeyup="performSearch(this)">
+        </div>
+
+        <div class="layout-grid">
+            
+            <main>
+                <div class="magazine-hero" id="hero-section">
+                    <div id="hero-main" class="hero-card"></div>
+                    <div class="hero-stack" id="hero-side"></div>
+                </div>
+
+                <h2 class="section-title" id="feed-title">Latest Headlines</h2>
+                <div class="news-grid" id="news-grid"></div>
+            </main>
+
+            <aside>
+                
+                <div class="sidebar-widget desktop-search-widget">
+                    <h3 class="widget-title">Search News</h3>
+                    <div style="position:relative;">
+                        <input type="text" class="search-input" placeholder="Type to search..." onkeyup="performSearch(this)">
+                        <i class="fas fa-search" style="position:absolute; right:15px; top:12px; color:#999;"></i>
+                    </div>
+                </div>
+
+                <div class="sidebar-widget awareness-widget">
+                    <div class="awareness-header"><i class="fas fa-bullhorn"></i> Daily Awareness</div>
+                    <div id="auto-message" class="awareness-content">Loading...</div>
+                    <div class="awareness-footer">Auto-generated Daily</div>
+                </div>
+
+                <div class="sidebar-widget profile-widget">
+                    <h3 class="widget-title">About Team</h3>
+                    
+                    <div class="profile-section">
+                        <img src="images/image.jpeg" class="profile-pic" alt="Faisal Khan" onerror="this.src='https://via.placeholder.com/100'">
+                        <div class="profile-role">Founder of Vadi-e-Kashmir</div>
+                        <div class="profile-name">Faisal Khan</div>
+                        <p class="profile-bio">
+                            I am pursuing Automobile Engineering in the heart of Kashmir Srinagar and I completed my Class 10 education from RANA Army Goodwill School Hajin. Recently I was honored with an award by Youth Inspiration and Movie Maker by Hand 3rd sector Army Officer. Although I am not a journalist, I have actively highlighted public grievances with the support and cooperation of local administration.
+                        </p>
+                        <div class="profile-socials">
+                            <a href="https://www.facebook.com/share/14WPeSLnhXg/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.instagram.com/driftsoulkhan/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
+                            <a href="https://x.com/MrFaisalPathan1" class="social-icon-btn tw-bg"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="profile-separator"></div>
+
+                    <div class="profile-section">
+                        <img src="images/Asrar.jpg" class="profile-pic" alt="Haq Asrar" onerror="this.src='https://via.placeholder.com/100'">
+                        <div class="profile-role">Developer</div>
+                        <div class="profile-name">Haq Asrar</div>
+                        <p class="profile-bio">
+                            Hi, I’m Asrar, currently pursuing engineering and passionate about developing mobile apps and modern websites. I enjoy turning ideas into clean, functional, and user-friendly digital products. If you’re interested in collaborating or need an app or website, feel free to contact me.
+                        </p>
+                        <div class="profile-socials">
+                            <a href="https://www.facebook.com/share/181H58vCdm/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
+                            <a href="https://www.instagram.com/koshur.coder/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
+                            <a href="https://x.com/Haq1Asrar" class="social-icon-btn tw-bg"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-widget" id="ad-widget-container" style="display:none; text-align:center;">
+                    <span style="font-size:0.7rem; color:#999; letter-spacing: 1px;">ADVERTISEMENT</span>
+                    <div id="ad-content"></div>
+                </div>
+
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Trending Now</h3>
+                    <ul id="trending-list" style="list-style:none; padding:0;"></ul>
+                </div>
+                
+                <div class="sidebar-widget">
+                    <h3 class="widget-title">Contact Us</h3>
+                    <ul class="contact-list">
+                        <li><a href="https://chat.whatsapp.com/HML8Jrqk1CF6VdVNHuVqiD" class="social-link"><img src="images/whatsapp.png" alt="WA"> Join Group</a></li>
+                        <li><a href="https://www.facebook.com/share/1FVQaZpSB5/" class="social-link"><img src="images/facebook.png" alt="FB"> Facebook</a></li>
+                        <li><a href="https://www.instagram.com/vadiekashmir2025?igsh=MTM1ajh4cmQyYjA2bA==" class="social-link"><img src="images/instagram.png" alt="IG"> Instagram</a></li>
+                        <li><a href="https://x.com/MrFaisalPathan1" class="social-link"><img src="images/twitter.png" alt="X"> Twitter / X</a></li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2022 Vadi E Kashmir. All Rights Reserved. | Designed with <i class="fas fa-heart" style="color:red;"></i>
+    </footer>
+
+    <div id="newsModal" class="modal">
+        <div class="modal-content">
+            <div class="close-modal" onclick="document.getElementById('newsModal').style.display='none'">&times;</div>
+            
+            <div id="m-video" style="width:100%; aspect-ratio:16/9; display:none;"></div>
+            
+            <img id="m-img" class="modal-header-img" src="">
+            
+            <div class="modal-body">
+                <h2 id="m-title"></h2>
+                <div class="modal-meta">By <span id="m-author"></span> • <span id="m-date"></span></div>
+                
+                <button id="m-share-btn" class="modal-share-btn">
+                    <i class="fab fa-whatsapp"></i> Share this News
+                </button>
+
+                <div id="m-desc"></div>
+                
+                <h3 style="margin-top:20px;">Gallery</h3>
+                <div id="m-gallery" style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:15px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>

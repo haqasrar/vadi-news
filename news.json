@@ -1,0 +1,30 @@
+[
+    {
+        "id": 1,
+        "type": "hero",
+        "category": "Politics",
+        "title": "Historic Development Project Announced in Srinagar",
+        "summary": "Officials have unveiled a major infrastructure plan that promises to reshape the valley's connectivity and tourism sector.",
+        "image": "images/hero.jpg",
+        "date": "Oct 24, 2023"
+    },
+    {
+        "id": 2,
+        "type": "breaking",
+        "text": "Heavy snowfall predicted for Gulmarg region this weekend..."
+    },
+    {
+        "id": 3,
+        "type": "standard",
+        "title": "Apple Harvest Hits Record High This Season",
+        "image": "images/news1.jpg",
+        "date": "Oct 23, 2023"
+    },
+    {
+        "id": 4,
+        "type": "standard",
+        "title": "New Educational Policy Implemented in Schools",
+        "image": "images/news1.jpg",
+        "date": "Oct 22, 2023"
+    }
+]
