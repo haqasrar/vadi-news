@@ -26,18 +26,38 @@ let allNewsData = [];
 
 // --- 1. DATA LOADING ---
 async function loadAllData() {
-    // ADS
+    // ADS SECTION (Updated for Clickable Links)
     try {
         const adDoc = await getDoc(doc(db, "settings", "ads"));
         if (adDoc.exists()) {
             const adData = adDoc.data();
             const widget = document.getElementById('ad-widget-container');
+            
             if(widget) {
-                widget.style.display = 'block';
+                widget.style.display = 'block'; // Show the widget box
+                
                 if (adData.type === 'manual') {
-                    const bioHtml = adData.bio ? `<p style="font-size:0.85rem; color:#555; margin-top:10px;">${formatText(adData.bio)}</p>` : '';
-                    document.getElementById('ad-content').innerHTML = `<a href="${adData.link||'#'}" target="_blank"><img src="${adData.img}" style="width:100%; border-radius:8px;"></a>${bioHtml}`;
+                    // 1. Get the Link (or use # if empty)
+                    const targetLink = adData.link || '#';
+                    
+                    // 2. Prepare the Image
+                    const imgHtml = `<img src="${adData.img}" style="width:100%; border-radius:8px; display:block; box-shadow:0 2px 5px rgba(0,0,0,0.1);">`;
+                    
+                    // 3. Prepare the Description (Bio)
+                    const bioHtml = adData.bio ? `<p style="font-size:0.9rem; color:#333; margin-top:10px; line-height:1.4; font-weight:500;">${formatText(adData.bio)}</p>` : '';
+
+                    // 4. Combine into a CLICKABLE block
+                    document.getElementById('ad-content').innerHTML = `
+                        <a href="${targetLink}" target="_blank" style="text-decoration:none; display:block; color:inherit; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            ${imgHtml}
+                            ${bioHtml}
+                            <div style="margin-top:8px; font-size:0.8rem; color:#b91c1c; font-weight:bold; text-align:right;">
+                                Open Link <i class="fas fa-external-link-alt"></i>
+                            </div>
+                        </a>
+                    `;
                 } else {
+                    // For Google Adsense code
                     document.getElementById('ad-content').innerHTML = adData.code;
                 }
             }
@@ -191,27 +211,20 @@ function mixTextAndImages(description, galleryImages) {
     if (!description) return "";
     
     // 1. Split text into paragraphs
-    // We try to split by Double Newline first, if not, then single newline, or periods
     let paragraphs = description.split(/\n\n|\n/);
     if (paragraphs.length < 2) {
-        // If it's one giant block, try splitting by sentences roughly
         paragraphs = description.match( /[^.!?]+[.!?]+/g ) || [description];
     }
 
     let finalHTML = "";
     let imageIndex = 0;
     
-    // Logic: Insert an image every 2-3 paragraphs roughly
-    // Or simpler: distribute images evenly
-    
     paragraphs.forEach((para, index) => {
-        // Clean the paragraph
         if(para.trim() === "") return;
         
         finalHTML += `<p style="margin-bottom:15px; line-height:1.8; font-size:1.1rem; color:#333;">${formatText(para)}</p>`;
 
-        // CHECK: Is it time to insert an image?
-        // We insert after every 3rd paragraph, OR if we are halfway and have images left
+        // Insert image every 2nd paragraph
         if ((index + 1) % 2 === 0 && galleryImages && imageIndex < galleryImages.length) {
             finalHTML += `
                 <div style="margin: 20px 0;">
@@ -224,7 +237,7 @@ function mixTextAndImages(description, galleryImages) {
         }
     });
 
-    // If any images remain, dump them at the bottom
+    // Dump remaining images
     if (galleryImages && imageIndex < galleryImages.length) {
         finalHTML += `<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">`;
         for (let i = imageIndex; i < galleryImages.length; i++) {
@@ -236,19 +249,14 @@ function mixTextAndImages(description, galleryImages) {
     return finalHTML;
 }
 
-// --- 6. OPEN ARTICLE PAGE (THE NEW "PAGE" LOGIC) ---
+// --- 6. OPEN ARTICLE PAGE ---
 window.openArticlePage = function(item) {
-    // 1. Hide Main Content
     document.getElementById('main-content-area').style.display = 'none';
     
-    // 2. Show Article Page
     const page = document.getElementById('article-page-view');
     page.style.display = 'block';
     window.scrollTo(0,0);
 
-    // 3. Populate Data
-    
-    // HEADER: Share Button (Top Right)
     const headerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; padding: 15px 0; border-bottom:1px solid #eee; margin-bottom:15px;">
             <button onclick="closeArticle()" style="background:none; border:none; font-size:1.2rem; cursor:pointer; color:#333;">
@@ -261,7 +269,6 @@ window.openArticlePage = function(item) {
         </div>
     `;
 
-    // MAIN PHOTO
     let mediaHTML = "";
     if(item.video && item.video.trim() !== "") {
         const safeUrl = getEmbedUrl(item.video);
@@ -270,26 +277,16 @@ window.openArticlePage = function(item) {
         mediaHTML = `<img src="${item.img}" style="width:100%; border-radius:10px; margin-bottom:15px; max-height:400px; object-fit:cover;">`;
     }
 
-    // META DATA
     const writerName = item.writer || item.author || "Admin";
     const dateStr = item.date || "";
 
-    // CONTENT MIXING
-    // We pass the description and the gallery array (excluding the main image if it duplicates)
-    // Assuming 'gallery' contains extra images.
     let contentHTML = "";
-    
-    // WRITER NAME : DESCRIPTION
-    // We start the first paragraph with the writer name in RED
     contentHTML += `<div style="margin-bottom:20px;">
                         <span style="color:#d32f2f; font-weight:bold; font-size:1.1rem;">${writerName} : </span>
                     </div>`;
 
-    // Now inject the rest of the text mixed with photos
     contentHTML += mixTextAndImages(item.desc, item.gallery);
 
-
-    // INJECT INTO DOM
     document.getElementById('article-container').innerHTML = `
         ${headerHTML}
         ${mediaHTML}
@@ -321,7 +318,6 @@ function formatText(text) {
 }
 
 function getEmbedUrl(url) {
-    // (Same video logic as before)
     if (!url) return "";
     if (url.includes("youtu")) {
          let videoId = url.split("v=")[1] || url.split("/").pop();
@@ -332,7 +328,6 @@ function getEmbedUrl(url) {
     return url;
 }
 
-// (Share function remains same as previous version)
 window.shareNews = async function(title, imageUrl) {
     const websiteUrl = window.location.origin;
     const captionText = `${title}\n\nRead more: ${websiteUrl}`;
@@ -348,7 +343,8 @@ window.shareNews = async function(title, imageUrl) {
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
     if (!el) return;
-    const msgs = [ "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
+    const msgs = [ 
+        "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
         "💧 Save Water: A drop of water is worth more than a sack of gold to a thirsty man.",
         "🌳 Environment: He that plants a tree loves others beside himself.",
         "🚭 Health: Your body hears everything your mind says. Stay positive, stay healthy.",
@@ -357,16 +353,9 @@ function generateDailyMessage() {
         "🏥 Health: An apple a day keeps the doctor away. Eat fresh, live long.",
         "🛑 Traffic: Don't use mobile phones while driving. Your life is precious.",
         "🤝 Community: United we stand, divided we fall. Help your neighbors.",
-        "🩸 Donation: Blood donation is the real act of humanity. Save a life today.",
-        "🌊 Water: Don't let the water run while you brush your teeth.",
-        "🔥 Safety: Check your gas cylinder regulator before going to bed.",
-        "🧠 Mental Health: It's okay not to be okay. Talk to someone if you feel low.",
-        "🚴 Fitness: Take a walk or ride a bike. Your heart will thank you.",
-        "🎓 Education: Education is the most powerful weapon which you can use to change the world.",
-        "🚦 Rules: Red means stop, Green means go. Respect traffic lights.",
-        "🔋 Future: Recycle e-waste. Don't throw batteries in the trash.",
-        "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
-        "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
-        "🐶 Animals: Be kind to street animals. They feel pain too."];
-    el.innerHTML = `"${msgs[0]}"`;
+        "🩸 Donation: Blood donation is the real act of humanity. Save a life today."
+    ];
+    // Uses date to cycle through messages so it changes every day
+    const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+    el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
