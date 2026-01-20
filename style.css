@@ -50,14 +50,13 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
     font-size: 1.6rem;
     margin-bottom: 20px;
     padding-bottom: 5px;
-    border-bottom: 3px solid var(--primary); /* Deep Red Underline */
+    border-bottom: 3px solid var(--primary); /* */
     line-height: 1;
     font-family: 'Playfair Display', serif;
     font-weight: 700;
     color: var(--dark);
 }
 
-/* Adds "Top Headline" text with underline */
 #hero-section::before {
     content: "Top Headline";
     display: block;
@@ -76,7 +75,18 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
 .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
 .card-tag { position: absolute; top: 10px; left: 10px; background: var(--primary); color: white; padding: 4px 10px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; }
 .card-content { padding: 15px; flex-grow: 1; }
-.card-footer { border-top: 1px solid rgba(0,0,0,0.05); padding-top: 10px; margin-top: 10px; font-size: 0.8rem; color: var(--primary); font-weight: bold; }
+
+/* Date and Writer Styling */
+.card-footer { 
+    padding-top: 10px; 
+    margin-top: 10px; 
+    font-size: 0.75rem; 
+    color: var(--primary); 
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 /* SIDEBAR & ICONS (FIXED ALIGNMENT) */
 .sidebar-widget { background: var(--white); padding: 20px; border-radius: var(--radius); margin-bottom: 25px; box-shadow: var(--shadow); }
@@ -85,7 +95,7 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
 .profile-section {
     display: flex;
     flex-direction: column;
-    align-items: center;    /* Centers image and text */
+    align-items: center; /* */
     text-align: center;
     margin-bottom: 25px;
 }
@@ -95,14 +105,14 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
     height: 85px; 
     border-radius: 50%; 
     border: 3px solid var(--primary); 
-    margin: 0 auto 12px auto; /* Centers the picture */
+    margin: 0 auto 12px auto; /* */
     display: block;
 }
 
 .profile-socials {
     display: flex;
-    flex-direction: row;    /* Forces icons to be horizontal */
-    justify-content: center; /* Centers icons under the name */
+    flex-direction: row; /* */
+    justify-content: center;
     gap: 12px; 
     margin-top: 10px;
     width: 100%;
@@ -116,18 +126,12 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
     align-items: center; 
     justify-content: center; 
     color: white; 
-    font-size: 0.9rem; 
-    transition: transform 0.2s;
+    font-size: 0.9rem;
 }
 
 .fb-bg { background: #3b5998; } .insta-bg { background: #e1306c; } .tw-bg { background: #000; }
 
-.contact-list { list-style: none; }
-.contact-list li { margin-bottom: 15px; }
-.social-link { display: flex; align-items: center; text-decoration: none; color: var(--dark); font-weight: 600; }
-.contact-list img { width: 35px; height: 35px; margin-right: 15px; object-fit: contain; }
-
-/* ARTICLE PAGE FIXED */
+/* ARTICLE PAGE */
 #article-page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light); z-index: 9999; overflow-y: auto; }
 .article-inner { max-width: 800px; margin: 0 auto; padding: 20px; }
 .article-body, .article-body * { color: var(--dark) !important; font-size: 1.15rem; line-height: 1.8; }

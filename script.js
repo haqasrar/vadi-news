@@ -58,14 +58,22 @@ function renderNews(category) {
             <img src="${top.img}"><div class="overlay"><h2>${top.title}</h2></div></div>`;
     }
 
-    // Grid
+    // Grid (Card includes Writer and Date)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
-        ng.innerHTML += `<div class="news-card-modern" onclick='openArticlePage(${safe})'>
-            <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
-            <div class="card-content"><h3>${n.title}</h3><div class="card-footer">✍️ ${n.writer || "Admin"}</div></div></div>`;
+        ng.innerHTML += `
+            <div class="news-card-modern" onclick='openArticlePage(${safe})'>
+                <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
+                <div class="card-content">
+                    <h3>${n.title}</h3>
+                    <div class="card-footer">
+                        <span>✍️ ${n.writer || "Admin"}</span>
+                        <span>📅 ${n.date || ""}</span>
+                    </div>
+                </div>
+            </div>`;
     });
 }
 
@@ -73,7 +81,6 @@ function renderNews(category) {
 window.filterNews = (cat) => {
     window.closeArticle();
     renderNews(cat);
-    // Update active class on nav
     document.querySelectorAll('nav a').forEach(a => {
         a.classList.remove('active');
         if(a.innerText.includes(cat) || (cat==='all' && a.innerText.includes('Home'))) a.classList.add('active');
@@ -93,9 +100,17 @@ function renderSearchResults(results) {
     const ng = document.getElementById('news-grid');
     ng.innerHTML = results.map(n => {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        return `<div class="news-card-modern" onclick='openArticlePage(${safe})'>
-            <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
-            <div class="card-content"><h3>${n.title}</h3><div class="card-footer">✍️ ${n.writer || "Admin"}</div></div></div>`;
+        return `
+            <div class="news-card-modern" onclick='openArticlePage(${safe})'>
+                <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
+                <div class="card-content">
+                    <h3>${n.title}</h3>
+                    <div class="card-footer">
+                        <span>✍️ ${n.writer || "Admin"}</span>
+                        <span>📅 ${n.date || ""}</span>
+                    </div>
+                </div>
+            </div>`;
     }).join("");
 }
 
@@ -117,7 +132,9 @@ window.openArticlePage = (item) => {
         </div>
         <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
         <h1>${item.title}</h1>
-        <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);"><i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || "Admin"}</div>
+        <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
+            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || "Admin"}
+        </div>
         <div class="article-body">${item.desc}</div>`;
 };
 
