@@ -47,10 +47,8 @@ function renderNews(category) {
 
     const filtered = category === 'all' ? allNewsData : allNewsData.filter(n => n.category === category);
     
-    // Ticker
     ticker.innerHTML = allNewsData.slice(0, 5).map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
 
-    // Hero
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
@@ -58,19 +56,20 @@ function renderNews(category) {
             <img src="${top.img}"><div class="overlay"><h2>${top.title}</h2></div></div>`;
     }
 
-    // Grid (Card includes Writer and Date)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
+        
+        // FIXED: Now specifically using n.writer and n.date from Firebase
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
                     <h3>${n.title}</h3>
                     <div class="card-footer">
-                        <span>✍️ ${n.writer || "Admin"}</span>
-                        <span>📅 ${n.date || ""}</span>
+                        <span>✍️ ${n.writer || "Vadi News"}</span>
+                        <span>📅 ${n.date || "Recent"}</span>
                     </div>
                 </div>
             </div>`;
@@ -106,15 +105,15 @@ function renderSearchResults(results) {
                 <div class="card-content">
                     <h3>${n.title}</h3>
                     <div class="card-footer">
-                        <span>✍️ ${n.writer || "Admin"}</span>
-                        <span>📅 ${n.date || ""}</span>
+                        <span>✍️ ${n.writer || "Vadi News"}</span>
+                        <span>📅 ${n.date || "Recent"}</span>
                     </div>
                 </div>
             </div>`;
     }).join("");
 }
 
-// --- ARTICLE VIEW FIXED ---
+// --- ARTICLE VIEW ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
@@ -133,7 +132,7 @@ window.openArticlePage = (item) => {
         <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
         <h1>${item.title}</h1>
         <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || "Admin"}
+            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || "Vadi News"}
         </div>
         <div class="article-body">${item.desc}</div>`;
 };
