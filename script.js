@@ -30,7 +30,7 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA ---
+// --- DATA LOAD ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
@@ -60,7 +60,7 @@ function renderNews(category) {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
-        // DYNAMIC WRITER: Using n.writer from your database portal
+        // Updated to show only the Writer's name from portal
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
@@ -88,7 +88,7 @@ window.filterNews = (cat) => {
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
     document.getElementById('hero-main').innerHTML = ""; 
-    document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
+    document.getElementById('feed-title').innerText = `Search results: "${term}"`;
     const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
     
     const ng = document.getElementById('news-grid');
