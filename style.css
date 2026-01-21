@@ -20,7 +20,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
 
 /* --- TICKER --- */
 .ticker-wrap { background: var(--primary); color: white; padding: 10px 0; overflow: hidden; font-weight: 500; }
-.ticker-content { display: inline-block; white-space: nowrap; animation: ticker 25s linear infinite; padding-left: 100%; }
+.ticker-content { display: inline-block; white-space: nowrap; animation: ticker 40s linear infinite; padding-left: 100%; }
 @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
 /* --- HEADER --- */
@@ -69,7 +69,27 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.2); }
 .sidebar-widget { background: var(--white); padding: 20px; border-radius: var(--radius); margin-bottom: 25px; box-shadow: var(--shadow); }
 .widget-title { font-size: 1.2rem; border-bottom: 2px solid var(--primary); padding-bottom: 8px; margin-bottom: 15px; }
 
-/* --- ABOUT TEAM (FIXED ALIGNMENT) --- */
+/* --- NEW: IMPROVED DAILY AWARENESS --- */
+.awareness-widget { border-left: 5px solid var(--primary); background: var(--white); padding: 20px; }
+.awareness-header { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.awareness-content { font-size: 1.05rem; font-style: italic; color: var(--dark); line-height: 1.6; position: relative; }
+.awareness-footer { margin-top: 12px; font-size: 0.75rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* --- NEW: TRENDING PORTION --- */
+.trending-list { list-style: none; }
+.trending-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: 0.2s; }
+.trending-item:last-child { border-bottom: none; }
+.trending-item:hover { transform: translateX(5px); }
+.trending-rank { font-size: 1.4rem; font-weight: 900; color: var(--primary); opacity: 0.3; font-family: 'Playfair Display', serif; }
+.trending-text { font-size: 0.95rem; font-weight: 600; line-height: 1.4; color: var(--dark); }
+
+/* --- NEW: ADVERTISEMENT PORTION --- */
+.ad-widget { padding: 10px; text-align: center; background: #fdfdfd; }
+.ad-label { font-size: 0.65rem; color: #bbb; text-transform: uppercase; margin-bottom: 8px; display: block; }
+.ad-container { width: 100%; min-height: 250px; background: #eee; border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.ad-container img { width: 100%; height: auto; object-fit: cover; }
+
+/* --- ABOUT TEAM --- */
 .profile-section { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 25px; }
 .profile-pic { width: 85px; height: 85px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 12px; }
 .profile-socials { display: flex; gap: 12px; justify-content: center; }
