@@ -103,7 +103,8 @@ window.openArticlePage = (item) => {
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
             <button onclick="closeArticle()" class="back-btn">← BACK</button>
             <button style="background:#25D366; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;" 
-                onclick="shareNewsManual('${item.img}')"><i class="fab fa-whatsapp"></i> SHARE PHOTO</button>
+                onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.fbId}', '${item.img}')">
+                <i class="fab fa-whatsapp"></i> SHARE PHOTO & COPY LINK</button>
         </div>
         <div class="article-inner">
             <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
@@ -120,24 +121,34 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- DIRECT IMAGE-ONLY SHARE FUNCTION ---
-window.shareNewsManual = async (imageUrl) => {
-    if (navigator.share && imageUrl) {
-        try {
-            // Convert URL to a real file for WhatsApp
+// --- IMAGE SHARE + AUTO-COPY TEXT ---
+window.shareNewsManual = async (title, id, imageUrl) => {
+    const publicLink = `https://vediekashmir.netlify.app`;
+    const shareText = `*${title.toUpperCase()}*\n\nRead more at: ${publicLink}`;
+
+    try {
+        // 1. Automatically copy Title and Link to clipboard
+        await navigator.clipboard.writeText(shareText);
+        console.log("Text copied to clipboard!");
+
+        // 2. Share the actual image file
+        if (navigator.share && imageUrl) {
             const response = await fetch(imageUrl);
             const blob = await response.blob();
             const file = new File([blob], 'vadi-news.jpg', { type: blob.type });
 
             await navigator.share({
-                files: [file]
+                files: [file],
+                title: title
+                // Note: We don't put text here so you can paste the clipboard version manually as a caption.
             });
-        } catch (err) {
-            console.error("Direct share failed", err);
-            alert("Direct sharing is only supported on mobile browsers (Chrome/Safari).");
+        } else {
+            alert("Clipboard copied! Now paste in WhatsApp.");
+            window.open(`https://wa.me/`, '_blank');
         }
-    } else {
-        alert("Sharing is not supported on this browser.");
+    } catch (err) {
+        console.error("Share failed", err);
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
     }
 };
 
