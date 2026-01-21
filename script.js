@@ -103,8 +103,8 @@ window.openArticlePage = (item) => {
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
             <button onclick="closeArticle()" class="back-btn">← BACK</button>
             <button style="background:#25D366; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;" 
-                onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.fbId}', '${item.img}')">
-                <i class="fab fa-whatsapp"></i> SHARE PHOTO & COPY LINK</button>
+                onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.author || "Admin"}', '${item.fbId}', '${item.img}')">
+                <i class="fab fa-whatsapp"></i> SHARE PHOTO & TEXT</button>
         </div>
         <div class="article-inner">
             <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
@@ -121,15 +121,17 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- IMAGE SHARE + AUTO-COPY TEXT ---
-window.shareNewsManual = async (title, id, imageUrl) => {
+// --- IMAGE SHARE + FINAL TEXT FORMAT ---
+window.shareNewsManual = async (title, author, id, imageUrl) => {
     const publicLink = `https://vediekashmir.netlify.app`;
-    const shareText = `*${title.toUpperCase()}*\n\nRead more at: ${publicLink}`;
+    
+    // Formatting the text: Title, Writer, Link, and Signature
+    const shareText = `*${title.toUpperCase()}*\n\n✍️ Writer: ${author}\n\nRead more at:\n${publicLink}\n\n_Vadi-E-Kashmir_`;
 
     try {
-        // 1. Automatically copy Title and Link to clipboard
+        // 1. Automatically copy Title, Writer, Link, and Signature to clipboard
         await navigator.clipboard.writeText(shareText);
-        console.log("Text copied to clipboard!");
+        console.log("News details copied!");
 
         // 2. Share the actual image file
         if (navigator.share && imageUrl) {
@@ -140,10 +142,9 @@ window.shareNewsManual = async (title, id, imageUrl) => {
             await navigator.share({
                 files: [file],
                 title: title
-                // Note: We don't put text here so you can paste the clipboard version manually as a caption.
             });
         } else {
-            alert("Clipboard copied! Now paste in WhatsApp.");
+            alert("Details copied! Now paste in WhatsApp.");
             window.open(`https://wa.me/`, '_blank');
         }
     } catch (err) {
