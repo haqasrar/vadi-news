@@ -47,34 +47,36 @@ function renderNews(category) {
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    // 1. TICKER: Only shows 'breaking' type or 'Updates' category
+    // 1. TICKER: Separated from Main Feed
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // 2. FEED FILTER: Exclude ticker items from Hero and Grid
+    // 2. FEED FILTER: Excludes Ticker from Headlines
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 3. RENDER TOP HEADLINE (HERO)
+    // 3. RENDER TOP HEADLINE
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
+        const writerName = top.writer || top.writerName || ""; // Checks both possible field names
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
         hm.innerHTML = `
             <div class="hero-card" onclick='openArticlePage(${safe})'>
                 <img src="${top.img}" style="width:100%; height:400px; object-fit:cover;">
                 <div class="overlay">
-                    <span class="writer-top">✍️ ${top.writer || "Vadi News"}</span>
+                    <span class="writer-top">✍️ ${writerName}</span>
                     <h2>${top.title}</h2>
                 </div>
             </div>`;
     }
 
-    // 4. RENDER NEWS GRID (Dynamic Writer Name)
+    // 4. RENDER NEWS GRID (Dynamic Writer Name Only)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
+        const writerName = n.writer || n.writerName || ""; // Forces dynamic name from DB
         
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
@@ -82,10 +84,10 @@ function renderNews(category) {
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
-                    <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
+                    <div class="writer-under-title">✍️ ${writerName}</div>
                     <h3>${n.title}</h3>
                     <div class="card-footer">
-                        <span>📅 ${n.date || "Recent"}</span>
+                        <span>📅 ${n.date || ""}</span>
                     </div>
                 </div>
             </div>`;
@@ -101,11 +103,12 @@ window.performSearch = (el) => {
     const ng = document.getElementById('news-grid');
     ng.innerHTML = filtered.map(n => {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
+        const writerName = n.writer || n.writerName || "";
         return `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
-                    <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
+                    <div class="writer-under-title">✍️ ${writerName}</div>
                     <h3>${n.title}</h3>
                 </div>
             </div>`;
@@ -128,6 +131,7 @@ window.openArticlePage = (item) => {
     view.style.display = 'block';
     applyTheme();
     window.scrollTo(0,0);
+    const writerName = item.writer || item.writerName || "";
     const time = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
@@ -138,7 +142,7 @@ window.openArticlePage = (item) => {
         <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
         <h1>${item.title}</h1>
         <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || ""}
+            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${writerName}
         </div>
         <div class="article-body">${item.desc}</div>`;
 };
