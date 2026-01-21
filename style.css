@@ -20,7 +20,7 @@ body.dark-mode {
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Roboto', sans-serif; background-color: var(--light); color: var(--dark); transition: background-color 0.3s, color 0.3s; line-height: 1.6; }
 
-/* --- TICKER --- */
+/* --- PROFESSIONAL TICKER --- */
 .ticker-wrap {
     display: flex;
     align-items: center;
@@ -32,7 +32,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
     border-bottom: 2px solid #851414;
 }
 
-/* STATIC LEFT LABEL */
+/* Static Left Label */
 .ticker-label {
     background: #ffffff;
     color: var(--primary);
@@ -49,7 +49,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
     letter-spacing: 1px;
 }
 
-/* Flashing dot for the 'Live' look */
+/* Live Flashing Dot */
 .ticker-label::before {
     content: '';
     width: 8px;
@@ -138,7 +138,7 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 .sidebar-widget { background: var(--white); padding: 25px; border-radius: 12px; margin-bottom: 30px; box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.05); }
 .widget-title { font-size: 1.1rem; border-bottom: 2px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; font-weight: 800; text-transform: uppercase; color: var(--dark); letter-spacing: 0.5px; }
 
-/* --- IMPROVED DAILY AWARENESS --- */
+/* --- DAILY AWARENESS --- */
 .awareness-widget { border-left: 6px solid var(--primary); background: var(--white); padding: 25px; }
 .awareness-header { font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--primary); margin-bottom: 15px; display: flex; align-items: center; gap: 12px; font-weight: 800; }
 .awareness-content { font-size: 1.05rem; font-style: italic; color: var(--dark); line-height: 1.7; padding: 15px; background: var(--primary-soft); border-radius: 6px; border: 1px dashed rgba(185, 28, 28, 0.2); }
@@ -154,7 +154,7 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 .trending-text { font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: var(--dark); transition: 0.3s; }
 .trending-item:hover .trending-text { color: var(--primary); }
 
-/* --- ADVERTISEMENT PORTION --- */
+/* --- ADVERTISEMENT --- */
 .ad-widget { padding: 15px; text-align: center; background: var(--white); }
 .ad-label { font-size: 0.65rem; color: #9ca3af; text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 2px; font-weight: 800; }
 .ad-container { width: 100%; min-height: 250px; background: #f9fafb; border: 2px dashed #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
@@ -183,13 +183,42 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 /* --- ARTICLE VIEW --- */
 #article-page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); z-index: 9999; overflow-y: auto; display: none; }
 .article-inner { max-width: 850px; margin: 0 auto; padding: 40px 20px; }
-.article-header { margin-bottom: 30px; }
-.article-header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; line-height: 1.2; margin-bottom: 15px; }
-.article-meta { font-size: 0.9rem; color: #6b7280; font-weight: 600; display: flex; gap: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; }
+
+/* Title Refinement */
+.article-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    line-height: 1.2;
+    margin-bottom: 20px;
+    font-weight: 800;
+    word-wrap: break-word;
+    color: var(--dark);
+}
+
+/* Metadata Fix */
+.article-meta { 
+    font-size: 0.9rem; 
+    color: #6b7280; 
+    font-weight: 600; 
+    display: flex; 
+    flex-wrap: wrap;
+    gap: 15px; 
+    border-bottom: 1px solid #eee; 
+    padding-bottom: 15px; 
+    align-items: center;
+}
+
+.article-meta span {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap; /* Keeps Faisal Khan on one line */
+}
+
+/* Body Styling */
 .article-body { color: var(--dark); font-size: 1.15rem; line-height: 1.8; margin-top: 30px; }
 .article-body p { margin-bottom: 20px; }
 
-/* Smart Article Injected Images */
+/* Smart Injected Gallery Images */
 .article-body-image {
     width: 100%;
     margin: 35px 0;

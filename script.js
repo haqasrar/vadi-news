@@ -100,7 +100,7 @@ function renderNews(category) {
     });
 }
 
-// --- SMART ARTICLE VIEW WITH INJECTED IMAGES ---
+// --- ARTICLE VIEW WITH GALLERY INTEGRATION ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
 
@@ -110,23 +110,26 @@ window.openArticlePage = (item) => {
     applyTheme();
     window.scrollTo(0,0);
     
-    // Split description into lines to inject images every 20 lines
+    // 1. Process description and inject images from the gallery
     const lines = item.desc.split('\n');
     let formattedBody = "";
+    let galleryIndex = 0;
     
     lines.forEach((line, index) => {
         formattedBody += line + "<br>";
         
-        // Insert the main image again every 20 lines
-        if ((index + 1) % 20 === 0 && index !== lines.length - 1) {
+        // Every 20 lines, if a gallery image exists, inject it
+        if ((index + 1) % 20 === 0 && item.gallery && item.gallery[galleryIndex]) {
             formattedBody += `
-                <div class="article-body-image" style="width:100%; margin: 30px 0; border-left: 4px solid #b91c1c; padding-left: 10px;">
-                    <img src="${item.img}" style="width:100%; border-radius:8px; margin: 20px 0; max-height:300px; object-fit:cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div class="article-body-image" style="width:100%; margin: 30px 0; border-left: 5px solid #b91c1c; padding-left: 15px;">
+                    <img src="${item.gallery[galleryIndex]}" style="width:100%; border-radius:8px; margin: 20px 0; max-height:400px; object-fit:cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                 </div>`;
+            galleryIndex++; // Move to the next photo in your gallery
         }
     });
 
-    const time = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
+    // 2. Fix Date/Time: Only using the primary date field
+    const displayDate = item.date || "Recent Update";
     
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
@@ -137,11 +140,16 @@ window.openArticlePage = (item) => {
         </div>
         <div class="article-inner">
             <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
-            <h1>${item.title}</h1>
-            <div class="article-meta">
-                <span>✍️ ${item.author || "Admin"}</span> | <span>📅 ${item.date || ""}</span> | <span><i class="far fa-clock"></i> ${time}</span>
+            
+            <h1 style="margin-bottom: 15px; line-height: 1.3;">${item.title}</h1>
+            
+            <div class="article-meta" style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; color: #666; font-size: 0.9rem;">
+                <span style="white-space: nowrap;">✍️ ${item.author || "Admin"}</span>
+                <span style="color: #ccc;">|</span>
+                <span style="white-space: nowrap;">📅 ${displayDate}</span>
             </div>
-            <div class="article-body" style="line-height: 1.8; font-size: 1.1rem;">${formattedBody}</div>
+            
+            <div class="article-body" style="line-height: 1.8; font-size: 1.15rem; margin-top: 25px;">${formattedBody}</div>
         </div>`;
 };
 
