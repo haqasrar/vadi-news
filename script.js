@@ -36,17 +36,17 @@ async function loadAllData() {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         
-        // Fetch separate advertisements collection if it exists
+        // 1. Fetch separate advertisements collection
         const adSnapshot = await getDocs(collection(db, "ads"));
         const ads = adSnapshot.docs.map(doc => doc.data());
 
         renderNews('all');
-        renderTrending(); // New: Handles the trending sidebar
-        renderAds(ads);   // New: Handles advertisements
+        renderTrending(); 
+        renderAds(ads);   
     } catch (e) { console.error("Firebase load error", e); }
 }
 
-// --- NEW: RENDER TRENDING (Mapped to Firebase 'isTrending') ---
+// --- RENDER TRENDING (Mapped to Firebase 'isTrending') ---
 function renderTrending() {
     const tl = document.getElementById('trending-list');
     if (!tl) return;
@@ -65,14 +65,17 @@ function renderTrending() {
     });
 }
 
-// --- NEW: RENDER ADS (Mapped to Admin Portal Uploads) ---
+// --- RENDER ADS (Using fields from Firebase: img, link, bio) ---
 function renderAds(ads) {
     const adSlot = document.getElementById('ad-slot');
     if (!adSlot || ads.length === 0) return;
     
-    // Display the most recent advertisement uploaded
+    // 2. Display the most recent advertisement uploaded
     const currentAd = ads[0]; 
-    adSlot.innerHTML = `<img src="${currentAd.img}" alt="Advertisement" style="width:100%; height:auto; object-fit:cover;">`;
+    adSlot.innerHTML = `
+        <a href="${currentAd.link || '#'}" target="_blank">
+            <img src="${currentAd.img}" alt="${currentAd.bio || 'Advertisement'}" style="width:100%; height:auto; object-fit:cover; display:block;">
+        </a>`;
 }
 
 // --- RENDERING LOGIC ---
@@ -109,7 +112,7 @@ function renderNews(category) {
 
     // News Grid
     filtered.forEach((n, idx) => {
-        if(category === 'all' && idx === 0) return;
+        if(category === 'all' && idx === 0) return; 
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         
         ng.innerHTML += `
