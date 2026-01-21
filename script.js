@@ -36,6 +36,7 @@ async function loadAllData() {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         
+        // Fetch ad from settings/ads document
         const adDocRef = doc(db, "settings", "ads");
         const adDocSnap = await getDoc(adDocRef);
 
@@ -88,7 +89,7 @@ function renderNews(category) {
     });
 }
 
-// --- ARTICLE VIEW & SHARE FIX ---
+// --- ARTICLE VIEW & SHARE ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
@@ -118,13 +119,15 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- THE NEW SHARE FUNCTION ---
+// --- THE SMART SHARE FUNCTION ---
 window.shareNewsManual = async (title, id) => {
+    // Ensure this link is clean and wait 1-2 seconds after pasting in WA for the image to load
     const publicLink = `https://vediekashmir.netlify.app/index.html?id=${id}`;
-    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\n${publicLink}`;
+    const shareText = `*${title.toUpperCase()}*\n\nRead the full story here:\n${publicLink}\n\n_Vadi E Kashmir Updates_`;
     
     try {
         await navigator.clipboard.writeText(shareText);
+        // Automatically open WhatsApp with the text ready
         window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
     } catch (err) {
         window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
@@ -136,6 +139,3 @@ function generateDailyMessage() {
     const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy.", "🚮 Keep clean."];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
-}
-
-document.addEventListener("DOMContentLoaded", () => { loadAllData(); generateDailyMessage(); applyTheme(); });
