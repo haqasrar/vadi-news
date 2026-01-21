@@ -245,3 +245,77 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
     .overlay h2 { font-size: 1.4rem; }
     .article-header h1 { font-size: 1.8rem; }
 }
+
+/* --- MEDIUM GRID FOR SHORT ARTICLES --- */
+.article-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Side-by-side layout */
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0,0,0,0.1);
+}
+
+.grid-image-item {
+    width: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--primary-soft);
+    border: 1px solid rgba(185, 28, 28, 0.1);
+}
+
+.grid-image-item img {
+    width: 100%;
+    height: 200px; /* Controlled medium height */
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.grid-image-item:hover img {
+    transform: scale(1.05);
+}
+
+/* --- RESPONSIVE IMAGE SIZING --- */
+.article-body-image {
+    width: 100%;
+    max-width: 450px; /* Limits size on desktop */
+    margin: 20px auto;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.article-body-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* --- MOBILE BOTTOM GRID (2 Columns) --- */
+.article-bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Shows 2 photos side-by-side on mobile */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.grid-image-item {
+    border-radius: 6px;
+    overflow: hidden;
+    height: 150px; /* Standardized medium height for mobile */
+}
+
+.grid-image-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Adjust for very small screens */
+@media (max-width: 480px) {
+    .article-title { font-size: 1.6rem; }
+    .grid-image-item { height: 120px; }
+    .article-body { font-size: 1rem; }
+}

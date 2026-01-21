@@ -100,7 +100,7 @@ function renderNews(category) {
     });
 }
 
-// --- UPDATED ARTICLE VIEW FOR SHORT TEXT & MULTIPLE IMAGES ---
+// --- RESPONSIVE MULTI-PHOTO DISTRIBUTION ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
     document.getElementById('main-content-area').style.display = 'none';
@@ -112,29 +112,31 @@ window.openArticlePage = (item) => {
     const lines = item.desc.split('\n');
     let formattedBody = "";
     let galleryIndex = 0;
-    const galleryItems = item.gallery || []; // Get chosen photos from Firebase
+    const galleryItems = item.gallery || []; // Get gallery array from Firebase
 
-    // Process the description line-by-line
+    // Smart Gap: Distribute photos evenly based on text length
+    const gap = Math.max(5, Math.floor(lines.length / (galleryItems.length + 1)));
+
     lines.forEach((line, index) => {
         formattedBody += `<p>${line}</p>`; 
         
-        // Inject images inside text ONLY if the article is long (more than 15 lines)
-        if (lines.length >= 15 && (index + 1) % 15 === 0 && galleryIndex < galleryItems.length) {
+        // Inject inside text based on the calculated gap
+        if (galleryIndex < galleryItems.length && (index + 1) % gap === 0) {
             formattedBody += `
                 <div class="article-body-image">
-                    <img src="${galleryItems[galleryIndex]}" alt="News Photo">
+                    <img src="${galleryItems[galleryIndex]}" alt="News Gallery">
                 </div>`;
             galleryIndex++; 
         }
     });
 
-    // For short articles or remaining images: Show as a medium-sized grid at the bottom
+    // Grid fallback for extra photos
     if (galleryIndex < galleryItems.length) {
         formattedBody += `<div class="article-bottom-grid">`;
         while (galleryIndex < galleryItems.length) {
             formattedBody += `
                 <div class="grid-image-item">
-                    <img src="${galleryItems[galleryIndex]}" alt="Gallery News Photo">
+                    <img src="${galleryItems[galleryIndex]}" alt="News Gallery">
                 </div>`;
             galleryIndex++;
         }
@@ -146,10 +148,10 @@ window.openArticlePage = (item) => {
             <button onclick="closeArticle()" class="back-btn">← BACK</button>
             <button style="background:#25D366; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;" 
                 onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.author || "Admin"}', '${item.fbId}', '${item.img}')">
-                <i class="fab fa-whatsapp"></i> SHARE PHOTO & TEXT</button>
+                <i class="fab fa-whatsapp"></i> SHARE</button>
         </div>
         <div class="article-inner">
-            <img src="${item.img}" class="main-article-img" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
+            <img src="${item.img}" class="main-article-img" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:350px; object-fit:cover;">
             <h1 class="article-title">${item.title}</h1>
             <div class="article-meta">
                 <span class="meta-item">✍️ ${item.author || "Admin"}</span>
