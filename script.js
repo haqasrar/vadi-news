@@ -46,19 +46,23 @@ function renderNews(category) {
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    // 1. FIXED TICKER: Only news marked as 'breaking' or in 'Updates' category appears here
+    // 1. FIXED TICKER: Only news specifically marked as 'breaking' or 'Updates' appears here
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
-    if(ticker) ticker.innerHTML = tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
+    if(ticker) ticker.innerHTML = tickerNews.length > 0 
+        ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
+        : "Welcome to Vadi E Kashmir";
 
-    const filtered = category === 'all' ? allNewsData : allNewsData.filter(n => n.category === category);
+    // 2. FILTER MAIN FEED: Exclude ticker news from the headlines and grid
+    const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
+    const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 2. HERO / TOP HEADLINE
+    // 3. RENDER TOP HEADLINE: Picks only from filtered main news
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
         hm.innerHTML = `
             <div class="hero-card" onclick='openArticlePage(${safe})'>
-                <img src="${top.img}">
+                <img src="${top.img}" style="width:100%; height:400px; object-fit:cover;">
                 <div class="overlay">
                     <span class="writer-top">✍️ ${top.writer || "Vadi News"}</span>
                     <h2>${top.title}</h2>
@@ -66,10 +70,11 @@ function renderNews(category) {
             </div>`;
     }
 
-    // 3. GRID NEWS (WRITER UNDER TITLE)
+    // 4. RENDER GRID NEWS: Writer's name placed under the title
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
+        
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
         ng.innerHTML += `
@@ -91,7 +96,10 @@ window.performSearch = (el) => {
     const term = el.value.toLowerCase();
     document.getElementById('hero-main').innerHTML = ""; 
     document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
-    const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
+    
+    // Filter from main feed only
+    const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
+    const filtered = feedNews.filter(n => n.title.toLowerCase().includes(term));
     
     const ng = document.getElementById('news-grid');
     ng.innerHTML = filtered.map(n => {
