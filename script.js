@@ -30,65 +30,67 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA LOAD ---
+// --- DATA LOADING ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         renderNews('all');
-    } catch (e) { console.error("Firebase error", e); }
+    } catch (e) { console.error("Firebase load error", e); }
 }
 
+// --- RENDERING LOGIC ---
 function renderNews(category) {
     const hm = document.getElementById('hero-main'), ng = document.getElementById('news-grid'),
           tl = document.getElementById('trending-list'), ticker = document.getElementById('ticker-box');
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    const filtered = category === 'all' ? allNewsData : allNewsData.filter(n => n.category === category);
-    ticker.innerHTML = allNewsData.slice(0, 5).map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
+    // 1. FIXED TICKER: Only news marked as 'breaking' or in 'Updates' category appears here
+    const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
+    if(ticker) ticker.innerHTML = tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ");
 
+    const filtered = category === 'all' ? allNewsData : allNewsData.filter(n => n.category === category);
+
+    // 2. HERO / TOP HEADLINE
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
-        hm.innerHTML = `<div class="hero-card" onclick='openArticlePage(${safe})'>
-            <img src="${top.img}"><div class="overlay"><h2>${top.title}</h2></div></div>`;
+        hm.innerHTML = `
+            <div class="hero-card" onclick='openArticlePage(${safe})'>
+                <img src="${top.img}">
+                <div class="overlay">
+                    <span class="writer-top">✍️ ${top.writer || "Vadi News"}</span>
+                    <h2>${top.title}</h2>
+                </div>
+            </div>`;
     }
 
+    // 3. GRID NEWS (WRITER UNDER TITLE)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
-        // Updated to show only the Writer's name from portal
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
+                    <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
                     <h3>${n.title}</h3>
                     <div class="card-footer">
-                        <span>✍️ ${n.writer || "Vadi News"}</span>
-                        <span>📅 ${n.date || ""}</span>
+                        <span>📅 ${n.date || "Recent"}</span>
                     </div>
                 </div>
             </div>`;
     });
 }
 
-// --- NAVIGATION & SEARCH ---
-window.filterNews = (cat) => {
-    window.closeArticle();
-    renderNews(cat);
-    document.querySelectorAll('nav a').forEach(a => {
-        a.classList.remove('active');
-        if(a.innerText.includes(cat) || (cat==='all' && a.innerText.includes('Home'))) a.classList.add('active');
-    });
-};
-
+// --- SEARCH & NAVIGATION ---
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
     document.getElementById('hero-main').innerHTML = ""; 
-    document.getElementById('feed-title').innerText = `Search results: "${term}"`;
+    document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
     const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
     
     const ng = document.getElementById('news-grid');
@@ -98,14 +100,21 @@ window.performSearch = (el) => {
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
+                    <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
                     <h3>${n.title}</h3>
-                    <div class="card-footer">
-                        <span>✍️ ${n.writer || "Vadi News"}</span>
-                        <span>📅 ${n.date || ""}</span>
-                    </div>
+                    <div class="card-footer"><span>📅 ${n.date || "Recent"}</span></div>
                 </div>
             </div>`;
     }).join("");
+};
+
+window.filterNews = (cat) => {
+    window.closeArticle();
+    renderNews(cat);
+    document.querySelectorAll('nav a').forEach(a => {
+        a.classList.remove('active');
+        if(a.innerText.includes(cat) || (cat==='all' && a.innerText.includes('Home'))) a.classList.add('active');
+    });
 };
 
 // --- ARTICLE VIEW ---
@@ -115,9 +124,7 @@ window.openArticlePage = (item) => {
     view.style.display = 'block';
     applyTheme();
     window.scrollTo(0,0);
-
     const time = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
-
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
             <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); font-weight:bold; cursor:pointer;">← BACK</button>
