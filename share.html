@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vadi E Kashmir</title>
+
     <meta property="og:type" content="article">
-    <meta property="og:title" id="og-title" content="Vadi E Kashmir Updates">
+    <meta property="og:title" id="og-title" content="Vadi E Kashmir">
     <meta property="og:description" id="og-desc" content="Read the full story on Vadi E Kashmir.">
     <meta property="og:image" id="og-img" content="https://vediekashmir.netlify.app/images/Logo.png">
     <meta property="og:url" id="og-url" content="https://vediekashmir.netlify.app/">
@@ -34,16 +37,19 @@
 
                 if (snap.exists()) {
                     const data = snap.data();
+                    
                     // Update meta tags dynamically for the crawler
                     document.title = data.title;
                     document.getElementById('og-title').setAttribute("content", data.title);
-                    document.getElementById('og-img').setAttribute("content", data.img); // Grabs specific news image
+                    
+                    // Grabs specific news image from Firebase
+                    document.getElementById('og-img').setAttribute("content", data.img); 
                     document.getElementById('og-desc').setAttribute("content", data.desc.substring(0, 150) + "...");
                     
-                    // Redirect to the main page to show the actual article
+                    // Redirect to index.html after the crawler has a chance to read the tags
                     setTimeout(() => {
                         window.location.href = `index.html?id=${id}`;
-                    }, 500); 
+                    }, 800); 
                 } else {
                     window.location.href = "index.html";
                 }
@@ -55,9 +61,12 @@
     </script>
 </head>
 <body>
-    <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
+    <div style="text-align:center; margin-top:100px; font-family:sans-serif; color:#b91c1c;">
         <h2>Vadi E Kashmir</h2>
-        
+        <p>Fetching the latest news updates...</p>
+        <div style="margin-top:20px;">
+            <i class="fas fa-spinner fa-spin"></i>
+        </div>
     </div>
 </body>
 </html>

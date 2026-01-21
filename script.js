@@ -118,22 +118,29 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- DYNAMIC SHARE FUNCTION (FOR SPECIFIC NEWS PHOTO) ---
+// --- THE MANUAL CLIPBOARD SHARE FUNCTION ---
 window.shareNewsManual = async (title, id) => {
-    // We send the user to share.html so the news image appears in WhatsApp
+    // 1. Create the link that points to your redirector page
     const publicLink = `https://vediekashmir.netlify.app/share.html?id=${id}`;
     
+    // 2. Format the text exactly as you want to paste it
     const shareText = `*${title.toUpperCase()}*\n\nRead the full story here:\n${publicLink}\n\n_Vadi E Kashmir Updates_`;
     
     try {
+        // 3. Automatically copy the Title and Link to your clipboard
         await navigator.clipboard.writeText(shareText);
-        alert("News Details Copied! Opening WhatsApp...");
         
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        // 4. Alert the user so they know it's ready to paste
+        alert("News Title and Link Copied! Opening WhatsApp... Just paste the details there.");
+        
+        // 5. Open WhatsApp
+        const waUrl = `https://wa.me/?text=`; // Opened empty so you can paste the clipboard content
         window.open(waUrl, '_blank');
         
     } catch (err) {
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        // Fallback: if clipboard fails, open WhatsApp with pre-filled text
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, '_blank');
     }
 };
 
