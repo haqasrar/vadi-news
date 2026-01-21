@@ -168,7 +168,7 @@ window.closeArticle = () => {
 // --- IMAGE SHARE + FINAL TEXT FORMAT ---
 window.shareNewsManual = async (title, author, id, imageUrl) => {
     const publicLink = `https://vediekashmir.netlify.app`;
-    const shareText = `*${title.toUpperCase()}*\n\n✍️ Writer: ${author}\n\nRead more at:\n${publicLink}\n\n_Vadi-E-Kashmir_`;
+    const shareText = `*${title.toUpperCase()}*\n\n✍️ : ${author}\n\nRead more at:\n${publicLink}\n\n_Vadi-E-Kashmir_`;
 
     try {
         await navigator.clipboard.writeText(shareText);
