@@ -90,6 +90,9 @@ function renderNews(category) {
 
 // --- ARTICLE VIEW & SHARE ---
 window.openArticlePage = (item) => {
+    // Dynamically update meta tags for the crawler when article is opened
+    updateMetaForCrawler(item);
+
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
     view.style.display = 'block';
@@ -118,30 +121,29 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- THE MANUAL CLIPBOARD SHARE FUNCTION (MAIN LINK ONLY) ---
+// --- THE MANUAL CLIPBOARD SHARE (NO SHARE.HTML) ---
 window.shareNewsManual = async (title, id) => {
-    // 1. Using only your main domain to avoid 'Invalid Link' errors
     const publicLink = `https://vediekashmir.netlify.app`;
-    
-    // 2. Format the text for a clean, professional look
-    const shareText = `*${title.toUpperCase()}*\n\nRead the full story here:\n${publicLink}\n\n_Vadi E Kashmir Updates_`;
+    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\n${publicLink}`;
     
     try {
-        // 3. Automatically copy the Title and Main Link to your clipboard
         await navigator.clipboard.writeText(shareText);
-        
-        // 4. Alert user with instructions
-        alert("News Details Copied! Now open WhatsApp, paste the text, and wait 2 seconds for the image.");
-        
-        // 5. Open WhatsApp (Empty so you can paste manually)
-        const waUrl = `https://wa.me/`; 
-        window.open(waUrl, '_blank');
-        
+        alert("News Details Copied! Now open WhatsApp, paste, and wait 2 seconds for the image.");
+        window.open(`https://wa.me/`, '_blank');
     } catch (err) {
-        // Fallback for older browsers
         window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
     }
 };
+
+// Function to update the Meta Photo for the crawler
+function updateMetaForCrawler(item) {
+    if (item) {
+        const titleMeta = document.getElementById('meta-title');
+        const imageMeta = document.getElementById('meta-image');
+        if(titleMeta) titleMeta.setAttribute('content', item.title);
+        if(imageMeta) imageMeta.setAttribute('content', item.img);
+    }
+}
 
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
