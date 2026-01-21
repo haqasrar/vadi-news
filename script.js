@@ -119,18 +119,23 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- THE SMART SHARE FUNCTION ---
+// --- SMART SHARE FUNCTION FOR PHOTO PREVIEW ---
 window.shareNewsManual = async (title, id) => {
-    // Ensure this link is clean and wait 1-2 seconds after pasting in WA for the image to load
+    // The photo preview works best when WhatsApp crawls a live HTTPS link
     const publicLink = `https://vediekashmir.netlify.app/index.html?id=${id}`;
     const shareText = `*${title.toUpperCase()}*\n\nRead the full story here:\n${publicLink}\n\n_Vadi E Kashmir Updates_`;
     
     try {
+        // Copy to clipboard so the user can paste it manually if the direct open doesn't fetch preview fast enough
         await navigator.clipboard.writeText(shareText);
-        // Automatically open WhatsApp with the text ready
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        
+        // Open WhatsApp with the text pre-filled
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, '_blank');
+        
     } catch (err) {
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+        window.open(waUrl, '_blank');
     }
 };
 
@@ -139,3 +144,6 @@ function generateDailyMessage() {
     const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy.", "🚮 Keep clean."];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
+}
+
+document.addEventListener("DOMContentLoaded", () => { loadAllData(); generateDailyMessage(); applyTheme(); });
