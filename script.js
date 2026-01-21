@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAj1lPZymdb6jSPrf8ZSfBIIlvc-7JqLho",
@@ -33,26 +33,31 @@ function applyTheme() {
 // --- DATA LOADING ---
 async function loadAllData() {
     try {
+        // Fetch News
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         
-        // 1. Fetch separate advertisements collection
-        const adSnapshot = await getDocs(collection(db, "ads"));
-        const ads = adSnapshot.docs.map(doc => doc.data());
+        // 1. FIXED: Fetch advertisement from settings/ads document
+        const adDocRef = doc(db, "settings", "ads");
+        const adDocSnap = await getDoc(adDocRef);
 
         renderNews('all');
         renderTrending(); 
-        renderAds(ads);   
+        
+        // 2. Render ad data if the document exists
+        if (adDocSnap.exists()) {
+            renderAds(adDocSnap.data()); 
+        }
     } catch (e) { console.error("Firebase load error", e); }
 }
 
-// --- RENDER TRENDING (Mapped to Firebase 'isTrending') ---
+// --- RENDER TRENDING (Top 5 ranks) ---
 function renderTrending() {
     const tl = document.getElementById('trending-list');
     if (!tl) return;
     tl.innerHTML = "";
 
-    // Filter news where isTrending is true in Firebase
+    // Filter news marked as trending in Firebase
     const trendingNews = allNewsData.filter(n => n.isTrending === true).slice(0, 5);
 
     trendingNews.forEach((n, index) => {
@@ -65,20 +70,19 @@ function renderTrending() {
     });
 }
 
-// --- RENDER ADS (Using fields from Firebase: img, link, bio) ---
-function renderAds(ads) {
+// --- RENDER ADS (Using img, link, and bio fields) ---
+function renderAds(adData) {
     const adSlot = document.getElementById('ad-slot');
-    if (!adSlot || ads.length === 0) return;
+    if (!adSlot || !adData) return;
     
-    // 2. Display the most recent advertisement uploaded
-    const currentAd = ads[0]; 
+    // 3. Dynamic mapping from Firebase fields
     adSlot.innerHTML = `
-        <a href="${currentAd.link || '#'}" target="_blank">
-            <img src="${currentAd.img}" alt="${currentAd.bio || 'Advertisement'}" style="width:100%; height:auto; object-fit:cover; display:block;">
+        <a href="${adData.link || '#'}" target="_blank" title="${adData.bio || ''}">
+            <img src="${adData.img}" alt="Advertisement" style="width:100%; height:auto; display:block; object-fit:cover;">
         </a>`;
 }
 
-// --- RENDERING LOGIC ---
+// --- MAIN RENDERING LOGIC ---
 function renderNews(category) {
     const hm = document.getElementById('hero-main'), 
           ng = document.getElementById('news-grid'),
@@ -86,17 +90,17 @@ function renderNews(category) {
 
     hm.innerHTML = ""; ng.innerHTML = "";
 
-    // Ticker logic
+    // Ticker logic (Updates or Breaking)
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // Main Feed Logic
+    // Feed logic
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // Hero Section
+    // Hero Section (Top Story)
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
@@ -110,7 +114,7 @@ function renderNews(category) {
             </div>`;
     }
 
-    // News Grid
+    // Grid News (Dynamic Author and Date)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return; 
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
@@ -162,6 +166,7 @@ window.filterNews = (cat) => {
     });
 };
 
+// --- ARTICLE VIEW ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
@@ -194,8 +199,7 @@ window.closeArticle = () => {
 window.shareNewsManual = async (title, id) => {
     const link = `https://vadi-news.vercel.app/news/${id}`;
     await navigator.clipboard.writeText(`*${title}*\n\nRead more: ${link}`);
-    alert("Title & Link copied! Now paste in WhatsApp.");
-    window.open('https://wa.me/', '_blank');
+    alert("Link Copied! You can now paste it in WhatsApp.");
 };
 
 function generateDailyMessage() {
