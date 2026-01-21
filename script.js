@@ -90,7 +90,6 @@ function renderNews(category) {
 
 // --- ARTICLE VIEW & SHARE ---
 window.openArticlePage = (item) => {
-    // Dynamically update meta tags for the crawler when article is opened
     updateMetaForCrawler(item);
 
     document.getElementById('main-content-area').style.display = 'none';
@@ -104,7 +103,7 @@ window.openArticlePage = (item) => {
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
             <button onclick="closeArticle()" class="back-btn">← BACK</button>
             <button style="background:#25D366; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;" 
-                onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')"><i class="fab fa-whatsapp"></i> SHARE ON WHATSAPP</button>
+                onclick="shareNewsManual('${item.img}')"><i class="fab fa-whatsapp"></i> SHARE PHOTO</button>
         </div>
         <div class="article-inner">
             <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
@@ -121,21 +120,27 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- THE MANUAL CLIPBOARD SHARE (NO SHARE.HTML) ---
-window.shareNewsManual = async (title, id) => {
-    const publicLink = `https://vediekashmir.netlify.app`;
-    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\n${publicLink}`;
-    
-    try {
-        await navigator.clipboard.writeText(shareText);
-        alert("News Details Copied! Now open WhatsApp, paste, and wait 2 seconds for the image.");
-        window.open(`https://wa.me/`, '_blank');
-    } catch (err) {
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+// --- DIRECT IMAGE-ONLY SHARE FUNCTION ---
+window.shareNewsManual = async (imageUrl) => {
+    if (navigator.share && imageUrl) {
+        try {
+            // Convert URL to a real file for WhatsApp
+            const response = await fetch(imageUrl);
+            const blob = await response.blob();
+            const file = new File([blob], 'vadi-news.jpg', { type: blob.type });
+
+            await navigator.share({
+                files: [file]
+            });
+        } catch (err) {
+            console.error("Direct share failed", err);
+            alert("Direct sharing is only supported on mobile browsers (Chrome/Safari).");
+        }
+    } else {
+        alert("Sharing is not supported on this browser.");
     }
 };
 
-// Function to update the Meta Photo for the crawler
 function updateMetaForCrawler(item) {
     if (item) {
         const titleMeta = document.getElementById('meta-title');
