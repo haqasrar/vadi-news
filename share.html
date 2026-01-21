@@ -2,6 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta property="og:type" content="article">
+    <meta property="og:title" id="og-title" content="Vadi E Kashmir Updates">
+    <meta property="og:description" id="og-desc" content="Read the full story on Vadi E Kashmir.">
+    <meta property="og:image" id="og-img" content="https://vediekashmir.netlify.app/images/Logo.png">
+    <meta property="og:url" id="og-url" content="https://vediekashmir.netlify.app/">
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
         import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -18,36 +24,40 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function getMeta() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
+        async function fetchMetadata() {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
             if (id) {
                 const docRef = doc(db, "news", id);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    // Set the tags WhatsApp sees
+                const snap = await getDoc(docRef);
+
+                if (snap.exists()) {
+                    const data = snap.data();
+                    // Update meta tags dynamically for the crawler
                     document.title = data.title;
-                    document.querySelector('meta[property="og:title"]').setAttribute("content", data.title);
-                    document.querySelector('meta[property="og:image"]').setAttribute("content", data.img);
-                    document.querySelector('meta[property="og:description"]').setAttribute("content", data.desc.substring(0, 100));
+                    document.getElementById('og-title').setAttribute("content", data.title);
+                    document.getElementById('og-img').setAttribute("content", data.img); // Grabs specific news image
+                    document.getElementById('og-desc').setAttribute("content", data.desc.substring(0, 150) + "...");
                     
-                    // Redirect to the actual article on your main site
-                    window.location.href = `index.html?id=${id}`;
+                    // Redirect to the main page to show the actual article
+                    setTimeout(() => {
+                        window.location.href = `index.html?id=${id}`;
+                    }, 500); 
+                } else {
+                    window.location.href = "index.html";
                 }
             } else {
                 window.location.href = "index.html";
             }
         }
-        getMeta();
+        fetchMetadata();
     </script>
-    
-    <meta property="og:type" content="article">
-    <meta property="og:title" content="Vadi E Kashmir">
-    <meta property="og:description" content="Latest News Updates">
-    <meta property="og:image" content="https://vediekashmir.netlify.app/images/Logo.png">
 </head>
 <body>
-    <p>Redirecting to Vadi E Kashmir...</p>
+    <div style="text-align:center; margin-top:50px; font-family:sans-serif;">
+        <h2>Vadi E Kashmir</h2>
+        
+    </div>
 </body>
 </html>
