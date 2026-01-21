@@ -100,7 +100,7 @@ function renderNews(category) {
     });
 }
 
-// --- ARTICLE VIEW WITH GALLERY INTEGRATION ---
+// --- FULL ARTICLE VIEW WITH MULTI-PHOTO GALLERY FIX ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
 
@@ -110,27 +110,34 @@ window.openArticlePage = (item) => {
     applyTheme();
     window.scrollTo(0,0);
     
-    // 1. Process description and inject images from the gallery
+    // 1. Process description and inject images every 15 lines
     const lines = item.desc.split('\n');
     let formattedBody = "";
     let galleryIndex = 0;
+    const galleryItems = item.gallery || []; // Get your chosen photos
     
     lines.forEach((line, index) => {
-        formattedBody += line + "<br>";
+        formattedBody += `<p>${line}</p>`; 
         
-        // Every 20 lines, if a gallery image exists, inject it
-        if ((index + 1) % 20 === 0 && item.gallery && item.gallery[galleryIndex]) {
+        // Every 15 lines, show the next photo from your gallery
+        if ((index + 1) % 15 === 0 && galleryIndex < galleryItems.length) {
             formattedBody += `
-                <div class="article-body-image" style="width:100%; margin: 30px 0; border-left: 5px solid #b91c1c; padding-left: 15px;">
-                    <img src="${item.gallery[galleryIndex]}" style="width:100%; border-radius:8px; margin: 20px 0; max-height:400px; object-fit:cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                <div class="article-body-image">
+                    <img src="${galleryItems[galleryIndex]}" alt="Gallery Photo ${galleryIndex + 1}">
                 </div>`;
-            galleryIndex++; // Move to the next photo in your gallery
+            galleryIndex++; 
         }
     });
 
-    // 2. Fix Date/Time: Only using the primary date field
-    const displayDate = item.date || "Recent Update";
-    
+    // 2. If there are remaining photos that haven't been shown yet, add them at the end
+    while (galleryIndex < galleryItems.length) {
+        formattedBody += `
+            <div class="article-body-image">
+                <img src="${galleryItems[galleryIndex]}" alt="Gallery Photo ${galleryIndex + 1}">
+            </div>`;
+        galleryIndex++;
+    }
+
     document.getElementById('article-container').innerHTML = `
         <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
             <button onclick="closeArticle()" class="back-btn">← BACK</button>
@@ -139,17 +146,17 @@ window.openArticlePage = (item) => {
                 <i class="fab fa-whatsapp"></i> SHARE PHOTO & TEXT</button>
         </div>
         <div class="article-inner">
-            <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
+            <img src="${item.img}" class="main-article-img" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
             
-            <h1 style="margin-bottom: 15px; line-height: 1.3;">${item.title}</h1>
+            <h1 class="article-title">${item.title}</h1>
             
-            <div class="article-meta" style="display: flex; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #eee; padding-bottom: 15px; color: #666; font-size: 0.9rem;">
-                <span style="white-space: nowrap;">✍️ ${item.author || "Admin"}</span>
-                <span style="color: #ccc;">|</span>
-                <span style="white-space: nowrap;">📅 ${displayDate}</span>
+            <div class="article-meta">
+                <span class="meta-item">✍️ ${item.author || "Admin"}</span>
+                <span class="meta-divider">|</span>
+                <span class="meta-item">📅 ${item.date || "Recent"}</span>
             </div>
             
-            <div class="article-body" style="line-height: 1.8; font-size: 1.15rem; margin-top: 25px;">${formattedBody}</div>
+            <div class="article-body">${formattedBody}</div>
         </div>`;
 };
 
