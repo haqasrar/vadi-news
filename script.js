@@ -47,17 +47,17 @@ function renderNews(category) {
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    // 1. TICKER LOGIC
+    // 1. TICKER: Only shows 'breaking' type or 'Updates' category
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // 2. FEED FILTERING
+    // 2. FEED FILTER: Exclude ticker items from Hero and Grid
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 3. RENDER TOP HEADLINE
+    // 3. RENDER TOP HEADLINE (HERO)
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
@@ -71,7 +71,7 @@ function renderNews(category) {
             </div>`;
     }
 
-    // 4. RENDER NEWS GRID (Writer name pulled dynamically)
+    // 4. RENDER NEWS GRID (Dynamic Writer Name)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
@@ -80,9 +80,7 @@ function renderNews(category) {
         
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
-                <div class="card-img-wrap">
-                    <img src="${n.img}"><div class="card-tag">${n.category}</div>
-                </div>
+                <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
                     <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
                     <h3>${n.title}</h3>
@@ -99,10 +97,7 @@ window.performSearch = (el) => {
     const term = el.value.toLowerCase();
     document.getElementById('hero-main').innerHTML = "";
     document.getElementById('feed-title').innerText = `Search: "${term}"`;
-    
-    const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
-    const filtered = feedNews.filter(n => n.title.toLowerCase().includes(term));
-    
+    const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
     const ng = document.getElementById('news-grid');
     ng.innerHTML = filtered.map(n => {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
@@ -126,7 +121,7 @@ window.filterNews = (cat) => {
     });
 };
 
-// --- ARTICLE VIEW (Writer name fix) ---
+// --- ARTICLE VIEW ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
@@ -143,7 +138,7 @@ window.openArticlePage = (item) => {
         <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
         <h1>${item.title}</h1>
         <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || "Vadi News"}
+            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.writer || ""}
         </div>
         <div class="article-body">${item.desc}</div>`;
 };
@@ -156,7 +151,7 @@ window.closeArticle = () => {
 window.shareNewsManual = async (title, id) => {
     const link = `https://vadi-news.vercel.app/news/${id}`;
     await navigator.clipboard.writeText(`*${title}*\n\nRead more: ${link}`);
-    alert("Title & Link copied! Now paste in WhatsApp.");
+    alert("Title & Link copied!");
     window.open('https://wa.me/', '_blank');
 };
 
