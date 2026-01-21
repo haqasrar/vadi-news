@@ -30,53 +30,52 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA LOAD ---
+// --- DATA LOADING ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         renderNews('all');
-    } catch (e) { console.error("Firebase error", e); }
+    } catch (e) { console.error("Firebase load error", e); }
 }
 
+// --- RENDERING LOGIC ---
 function renderNews(category) {
     const hm = document.getElementById('hero-main'), 
-          ng = document.getElementById('news-grid'), 
+          ng = document.getElementById('news-grid'),
           tl = document.getElementById('trending-list'), 
           ticker = document.getElementById('ticker-box');
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    // 1. TICKER: Separated from Main Feed
+    // 1. TICKER LOGIC: Only show news marked as 'breaking' or in 'Updates' category
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // 2. FEED FILTER: Excludes Ticker from Headlines
+    // 2. FEED FILTERING: Exclude ticker news from the hero and main grid
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 3. RENDER TOP HEADLINE
+    // 3. RENDER TOP HEADLINE (HERO SECTION)
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
-        const writerName = top.writer || top.writerName || ""; // Checks both possible field names
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
         hm.innerHTML = `
             <div class="hero-card" onclick='openArticlePage(${safe})'>
                 <img src="${top.img}" style="width:100%; height:400px; object-fit:cover;">
                 <div class="overlay">
-                    <span class="writer-top">✍️ ${writerName}</span>
+                    <span class="writer-top">✍️ ${top.author || "Vadi News"}</span>
                     <h2>${top.title}</h2>
                 </div>
             </div>`;
     }
 
-    // 4. RENDER NEWS GRID (Dynamic Writer Name Only)
+    // 4. RENDER NEWS GRID: Author name placed under the title
     filtered.forEach((n, idx) => {
-        if(category === 'all' && idx === 0) return;
+        if(category === 'all' && idx === 0) return; // Skip the item already in the Hero
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        const writerName = n.writer || n.writerName || ""; // Forces dynamic name from DB
         
         if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
@@ -84,31 +83,34 @@ function renderNews(category) {
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
-                    <div class="writer-under-title">✍️ ${writerName}</div>
+                    <div class="writer-under-title">✍️ ${n.author || "Vadi News"}</div>
                     <h3>${n.title}</h3>
                     <div class="card-footer">
-                        <span>📅 ${n.date || ""}</span>
+                        <span>📅 ${n.date || "Recent"}</span>
                     </div>
                 </div>
             </div>`;
     });
 }
 
-// --- SEARCH ENGINE ---
+// --- SEARCH & NAVIGATION ---
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
-    document.getElementById('hero-main').innerHTML = "";
-    document.getElementById('feed-title').innerText = `Search: "${term}"`;
-    const filtered = allNewsData.filter(n => n.title.toLowerCase().includes(term));
+    document.getElementById('hero-main').innerHTML = ""; 
+    document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
+    
+    // Filter from main feed only
+    const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
+    const filtered = feedNews.filter(n => n.title.toLowerCase().includes(term));
+    
     const ng = document.getElementById('news-grid');
     ng.innerHTML = filtered.map(n => {
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        const writerName = n.writer || n.writerName || "";
         return `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
                 <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
                 <div class="card-content">
-                    <div class="writer-under-title">✍️ ${writerName}</div>
+                    <div class="writer-under-title">✍️ ${n.author || "Vadi News"}</div>
                     <h3>${n.title}</h3>
                 </div>
             </div>`;
@@ -124,44 +126,46 @@ window.filterNews = (cat) => {
     });
 };
 
-// --- ARTICLE VIEW ---
+// --- ARTICLE VIEW (Author Fix) ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
     view.style.display = 'block';
     applyTheme();
     window.scrollTo(0,0);
-    const writerName = item.writer || item.writerName || "";
     const time = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
     document.getElementById('article-container').innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 20px;">
             <button onclick="closeArticle()" style="background:none; border:none; color:var(--dark); font-weight:bold; cursor:pointer;">← BACK</button>
             <button style="background:#25D366; color:white; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer;" 
                 onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.fbId}')">WhatsApp SHARE</button>
         </div>
-        <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
-        <h1>${item.title}</h1>
-        <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
-            <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${writerName}
-        </div>
-        <div class="article-body">${item.desc}</div>`;
+        <div class="article-inner">
+            <img src="${item.img}" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
+            <h1>${item.title}</h1>
+            <div style="margin: 15px 0; font-size:0.9rem; font-weight:bold; color:var(--primary);">
+                <i class="far fa-calendar-alt"></i> ${item.date || ""} | <i class="far fa-clock"></i> ${time} | ✍️ ${item.author || "Vadi News"}
+            </div>
+            <div class="article-body">${item.desc}</div>
+        </div>`;
 };
 
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'block';
+    applyTheme();
 };
 
 window.shareNewsManual = async (title, id) => {
     const link = `https://vadi-news.vercel.app/news/${id}`;
     await navigator.clipboard.writeText(`*${title}*\n\nRead more: ${link}`);
-    alert("Title & Link copied!");
+    alert("Title & Link copied! Now paste in WhatsApp.");
     window.open('https://wa.me/', '_blank');
 };
 
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
-    const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy."];
+    const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy.", "🚮 Keep clean."];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
