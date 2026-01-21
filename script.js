@@ -35,30 +35,65 @@ async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
+        
+        // Fetch separate advertisements collection if it exists
+        const adSnapshot = await getDocs(collection(db, "ads"));
+        const ads = adSnapshot.docs.map(doc => doc.data());
+
         renderNews('all');
+        renderTrending(); // New: Handles the trending sidebar
+        renderAds(ads);   // New: Handles advertisements
     } catch (e) { console.error("Firebase load error", e); }
+}
+
+// --- NEW: RENDER TRENDING (Mapped to Firebase 'isTrending') ---
+function renderTrending() {
+    const tl = document.getElementById('trending-list');
+    if (!tl) return;
+    tl.innerHTML = "";
+
+    // Filter news where isTrending is true in Firebase
+    const trendingNews = allNewsData.filter(n => n.isTrending === true).slice(0, 5);
+
+    trendingNews.forEach((n, index) => {
+        const safe = JSON.stringify(n).replace(/'/g, "&#39;");
+        tl.innerHTML += `
+            <li class="trending-item" onclick='openArticlePage(${safe})'>
+                <span class="trending-rank">0${index + 1}</span>
+                <div class="trending-text">${n.title}</div>
+            </li>`;
+    });
+}
+
+// --- NEW: RENDER ADS (Mapped to Admin Portal Uploads) ---
+function renderAds(ads) {
+    const adSlot = document.getElementById('ad-slot');
+    if (!adSlot || ads.length === 0) return;
+    
+    // Display the most recent advertisement uploaded
+    const currentAd = ads[0]; 
+    adSlot.innerHTML = `<img src="${currentAd.img}" alt="Advertisement" style="width:100%; height:auto; object-fit:cover;">`;
 }
 
 // --- RENDERING LOGIC ---
 function renderNews(category) {
     const hm = document.getElementById('hero-main'), 
           ng = document.getElementById('news-grid'),
-          tl = document.getElementById('trending-list'), 
           ticker = document.getElementById('ticker-box');
 
-    hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
+    hm.innerHTML = ""; ng.innerHTML = "";
 
-    // 1. TICKER LOGIC: Only show news marked as 'breaking' or in 'Updates' category
+    // Ticker logic
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // 2. FEED FILTERING: Exclude ticker news from the hero and main grid
+    // Main Feed Logic
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 3. RENDER TOP HEADLINE (HERO SECTION)
+    // Hero Section
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
@@ -72,12 +107,10 @@ function renderNews(category) {
             </div>`;
     }
 
-    // 4. RENDER NEWS GRID: Author name placed under the title
+    // News Grid
     filtered.forEach((n, idx) => {
-        if(category === 'all' && idx === 0) return; // Skip the item already in the Hero
+        if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        
-        if(n.isTrending && tl) tl.innerHTML += `<li onclick='openArticlePage(${safe})' style="cursor:pointer; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.05);">📈 ${n.title}</li>`;
         
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
@@ -96,10 +129,10 @@ function renderNews(category) {
 // --- SEARCH & NAVIGATION ---
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
-    document.getElementById('hero-main').innerHTML = ""; 
+    const hm = document.getElementById('hero-main');
+    if(hm) hm.innerHTML = ""; 
     document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
     
-    // Filter from main feed only
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = feedNews.filter(n => n.title.toLowerCase().includes(term));
     
@@ -126,7 +159,6 @@ window.filterNews = (cat) => {
     });
 };
 
-// --- ARTICLE VIEW (Author Fix) ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
