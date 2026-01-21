@@ -30,33 +30,34 @@ function applyTheme() {
     if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 }
 
-// --- DATA LOADING ---
+// --- DATA LOAD ---
 async function loadAllData() {
     try {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         renderNews('all');
-    } catch (e) { console.error("Firebase load error", e); }
+    } catch (e) { console.error("Firebase error", e); }
 }
 
-// --- RENDERING LOGIC ---
 function renderNews(category) {
-    const hm = document.getElementById('hero-main'), ng = document.getElementById('news-grid'),
-          tl = document.getElementById('trending-list'), ticker = document.getElementById('ticker-box');
+    const hm = document.getElementById('hero-main'), 
+          ng = document.getElementById('news-grid'), 
+          tl = document.getElementById('trending-list'), 
+          ticker = document.getElementById('ticker-box');
 
     hm.innerHTML = ""; ng.innerHTML = ""; if(tl) tl.innerHTML = "";
 
-    // 1. FIXED TICKER: Only news specifically marked as 'breaking' or 'Updates' appears here
+    // 1. TICKER LOGIC
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
     if(ticker) ticker.innerHTML = tickerNews.length > 0 
         ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ")
         : "Welcome to Vadi E Kashmir";
 
-    // 2. FILTER MAIN FEED: Exclude ticker news from the headlines and grid
+    // 2. FEED FILTERING
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    // 3. RENDER TOP HEADLINE: Picks only from filtered main news
+    // 3. RENDER TOP HEADLINE
     if (category === 'all' && filtered.length > 0) {
         const top = filtered[0];
         const safe = JSON.stringify(top).replace(/'/g, "&#39;");
@@ -70,7 +71,7 @@ function renderNews(category) {
             </div>`;
     }
 
-    // 4. RENDER GRID NEWS: Writer's name placed under the title
+    // 4. RENDER NEWS GRID (Writer name pulled dynamically)
     filtered.forEach((n, idx) => {
         if(category === 'all' && idx === 0) return;
         const safe = JSON.stringify(n).replace(/'/g, "&#39;");
@@ -79,7 +80,9 @@ function renderNews(category) {
         
         ng.innerHTML += `
             <div class="news-card-modern" onclick='openArticlePage(${safe})'>
-                <div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div>
+                <div class="card-img-wrap">
+                    <img src="${n.img}"><div class="card-tag">${n.category}</div>
+                </div>
                 <div class="card-content">
                     <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
                     <h3>${n.title}</h3>
@@ -91,13 +94,12 @@ function renderNews(category) {
     });
 }
 
-// --- SEARCH & NAVIGATION ---
+// --- SEARCH ENGINE ---
 window.performSearch = (el) => {
     const term = el.value.toLowerCase();
-    document.getElementById('hero-main').innerHTML = ""; 
-    document.getElementById('feed-title').innerText = `Search results for: "${term}"`;
+    document.getElementById('hero-main').innerHTML = "";
+    document.getElementById('feed-title').innerText = `Search: "${term}"`;
     
-    // Filter from main feed only
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = feedNews.filter(n => n.title.toLowerCase().includes(term));
     
@@ -110,7 +112,6 @@ window.performSearch = (el) => {
                 <div class="card-content">
                     <div class="writer-under-title">✍️ ${n.writer || "Vadi News"}</div>
                     <h3>${n.title}</h3>
-                    <div class="card-footer"><span>📅 ${n.date || "Recent"}</span></div>
                 </div>
             </div>`;
     }).join("");
@@ -125,7 +126,7 @@ window.filterNews = (cat) => {
     });
 };
 
-// --- ARTICLE VIEW ---
+// --- ARTICLE VIEW (Writer name fix) ---
 window.openArticlePage = (item) => {
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
@@ -150,7 +151,6 @@ window.openArticlePage = (item) => {
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.getElementById('main-content-area').style.display = 'block';
-    applyTheme();
 };
 
 window.shareNewsManual = async (title, id) => {
@@ -162,7 +162,7 @@ window.shareNewsManual = async (title, id) => {
 
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
-    const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy.", "🚮 Keep clean."];
+    const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy."];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
