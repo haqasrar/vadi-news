@@ -36,7 +36,6 @@ async function loadAllData() {
         const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
         allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
         
-        // Fetch ad from settings/ads document
         const adDocRef = doc(db, "settings", "ads");
         const adDocSnap = await getDoc(adDocRef);
 
@@ -119,29 +118,47 @@ window.closeArticle = () => {
     document.getElementById('main-content-area').style.display = 'block';
 };
 
-// --- SMART SHARE FUNCTION FOR PHOTO PREVIEW ---
+// --- DYNAMIC SHARE FUNCTION (FOR SPECIFIC NEWS PHOTO) ---
 window.shareNewsManual = async (title, id) => {
-    // The photo preview works best when WhatsApp crawls a live HTTPS link
-    const publicLink = `https://vediekashmir.netlify.app/index.html?id=${id}`;
+    // We send the user to share.html so the news image appears in WhatsApp
+    const publicLink = `https://vediekashmir.netlify.app/share.html?id=${id}`;
+    
     const shareText = `*${title.toUpperCase()}*\n\nRead the full story here:\n${publicLink}\n\n_Vadi E Kashmir Updates_`;
     
     try {
-        // Copy to clipboard so the user can paste it manually if the direct open doesn't fetch preview fast enough
         await navigator.clipboard.writeText(shareText);
+        alert("News Details Copied! Opening WhatsApp...");
         
-        // Open WhatsApp with the text pre-filled
         const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
         window.open(waUrl, '_blank');
         
     } catch (err) {
-        const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
-        window.open(waUrl, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
     }
 };
 
 function generateDailyMessage() {
     const el = document.getElementById('auto-message');
-    const msgs = ["🚗 Drive safely.", "💧 Save water.", "🌳 Plant a tree.", "🚭 Stay healthy.", "🚮 Keep clean."];
+    const msgs = [ "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
+        "💧 Save Water: A drop of water is worth more than a sack of gold to a thirsty man.",
+        "🌳 Environment: He that plants a tree loves others beside himself.",
+        "🚭 Health: Your body hears everything your mind says. Stay positive, stay healthy.",
+        "⚡ Energy: Energy saved is energy generated. Switch off lights when not in use.",
+        "🚮 Cleanliness: Keep your city clean. Use dustbins and avoid plastic.",
+        "🏥 Health: An apple a day keeps the doctor away. Eat fresh, live long.",
+        "🛑 Traffic: Don't use mobile phones while driving. Your life is precious.",
+        "🤝 Community: United we stand, divided we fall. Help your neighbors.",
+        "🩸 Donation: Blood donation is the real act of humanity. Save a life today.",
+        "🌊 Water: Don't let the water run while you brush your teeth.",
+        "🔥 Safety: Check your gas cylinder regulator before going to bed.",
+        "🧠 Mental Health: It's okay not to be okay. Talk to someone if you feel low.",
+        "🚴 Fitness: Take a walk or ride a bike. Your heart will thank you.",
+        "🎓 Education: Education is the most powerful weapon which you can use to change the world.",
+        "🚦 Rules: Red means stop, Green means go. Respect traffic lights.",
+        "🔋 Future: Recycle e-waste. Don't throw batteries in the trash.",
+        "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
+        "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
+        "🐶 Animals: Be kind to street animals. They feel pain too."];
     const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
     if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
 }
