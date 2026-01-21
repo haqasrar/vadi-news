@@ -32,6 +32,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
     border-bottom: 2px solid #851414;
 }
 
+/* Static Left Label */
 .ticker-label {
     background: #ffffff;
     color: var(--primary);
@@ -48,6 +49,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
     letter-spacing: 1px;
 }
 
+/* Live Flashing Dot */
 .ticker-label::before {
     content: '';
     width: 8px;
@@ -94,18 +96,6 @@ header { background: var(--white); box-shadow: var(--shadow); position: sticky; 
 nav { display: flex; justify-content: center; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
 nav a { color: white; padding: 15px 25px; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; cursor: pointer; transition: 0.3s; text-decoration: none; }
 nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3px 0 white; }
-
-/* --- THEME BUTTON --- */
-.theme-btn {
-    background: none;
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    padding: 8px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.theme-btn:hover { background: var(--primary); color: white; }
 
 /* --- SEARCH BAR --- */
 .search-box-wrapper { position: relative; width: 100%; }
@@ -154,20 +144,41 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 .awareness-content { font-size: 1.05rem; font-style: italic; color: var(--dark); line-height: 1.7; padding: 15px; background: var(--primary-soft); border-radius: 6px; border: 1px dashed rgba(185, 28, 28, 0.2); }
 .awareness-footer { margin-top: 15px; font-size: 0.7rem; color: #9ca3af; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; text-align: right; }
 
-/* --- TRENDING LIST --- */
-.trending-list { list-style: none; }
+/* --- TRENDING PORTION --- */
+.trending-list { list-style: none; counter-reset: trending-counter; }
 .trending-item { display: flex; align-items: center; gap: 18px; padding: 18px 0; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; transition: 0.3s; }
 .trending-item:last-child { border-bottom: none; }
 .trending-item:hover { transform: translateX(8px); }
-.trending-rank { font-size: 2rem; font-weight: 900; color: var(--primary); opacity: 0.2; font-family: 'Playfair Display', serif; min-width: 45px; }
+.trending-rank { font-size: 2rem; font-weight: 900; color: var(--primary); opacity: 0.2; font-family: 'Playfair Display', serif; min-width: 45px; transition: 0.3s; }
 .trending-item:hover .trending-rank { opacity: 1; }
-.trending-text { font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: var(--dark); }
+.trending-text { font-size: 0.95rem; font-weight: 700; line-height: 1.4; color: var(--dark); transition: 0.3s; }
+.trending-item:hover .trending-text { color: var(--primary); }
 
 /* --- ADVERTISEMENT --- */
-.ad-widget { padding: 15px; text-align: center; }
+.ad-widget { padding: 15px; text-align: center; background: var(--white); }
 .ad-label { font-size: 0.65rem; color: #9ca3af; text-transform: uppercase; margin-bottom: 12px; display: block; letter-spacing: 2px; font-weight: 800; }
-.ad-container { width: 100%; min-height: 250px; background: #f9fafb; border: 2px dashed #e5e7eb; border-radius: 8px; overflow: hidden; }
+.ad-container { width: 100%; min-height: 250px; background: #f9fafb; border: 2px dashed #e5e7eb; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
 .ad-container img { width: 100%; height: auto; display: block; transition: 0.4s; }
+.ad-container:hover img { transform: scale(1.05); }
+
+/* --- ABOUT TEAM --- */
+.profile-section { display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.profile-section:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.profile-pic { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--primary); padding: 3px; margin-bottom: 15px; background: var(--white); object-fit: cover; }
+.profile-role { font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: var(--primary); letter-spacing: 1px; }
+.profile-name { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; color: var(--dark); font-family: 'Playfair Display', serif; }
+.profile-socials { display: flex; gap: 12px; justify-content: center; }
+.social-icon-btn { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; transition: 0.3s; font-size: 1rem; text-decoration: none; }
+.social-icon-btn:hover { transform: translateY(-4px) rotate(8deg); box-shadow: 0 5px 10px rgba(0,0,0,0.2); }
+.fb-bg { background: #1877F2; } .insta-bg { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); } .tw-bg { background: #000000; }
+
+/* --- CONTACT LIST --- */
+.contact-list { list-style: none; }
+.contact-list li { margin-bottom: 18px; }
+.social-link { display: flex; align-items: center; text-decoration: none; color: var(--dark); font-weight: 700; transition: 0.3s; font-size: 0.95rem; }
+.social-link:hover { color: var(--primary); transform: translateX(5px); }
+.contact-list img { width: 32px; height: 32px; margin-right: 15px; filter: grayscale(0.2); transition: 0.3s; }
+.social-link:hover img { filter: grayscale(0); transform: scale(1.1); }
 
 /* --- ARTICLE VIEW --- */
 #article-page-view { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--white); z-index: 9999; overflow-y: auto; display: none; }
@@ -200,7 +211,7 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 .article-meta span {
     display: inline-flex;
     align-items: center;
-    white-space: nowrap; /* Keeps name on one line */
+    white-space: nowrap; /* Keeps Faisal Khan on one line */
 }
 
 /* Body Styling */
@@ -213,6 +224,7 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
     margin: 35px 0;
     border-left: 5px solid var(--primary); 
     padding: 15px;
+    padding-left: 15px;
     background: var(--primary-soft);
     border-radius: var(--radius);
 }
@@ -226,8 +238,6 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 
 /* --- UTILS --- */
 .back-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; }
-
-footer { padding: 40px 20px; background: var(--white); text-align: center; border-top: 1px solid rgba(0,0,0,0.05); color: #6b7280; font-size: 0.9rem; }
 
 @media (max-width: 768px) {
     .logo-text { font-size: 1.5rem; }
