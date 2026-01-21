@@ -100,42 +100,45 @@ function renderNews(category) {
     });
 }
 
-// --- FULL ARTICLE VIEW WITH MULTI-PHOTO GALLERY FIX ---
+// --- UPDATED ARTICLE VIEW FOR SHORT TEXT & MULTIPLE IMAGES ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
-
     document.getElementById('main-content-area').style.display = 'none';
     const view = document.getElementById('article-page-view');
     view.style.display = 'block';
     applyTheme();
     window.scrollTo(0,0);
     
-    // 1. Process description and inject images every 15 lines
     const lines = item.desc.split('\n');
     let formattedBody = "";
     let galleryIndex = 0;
-    const galleryItems = item.gallery || []; // Get your chosen photos
-    
+    const galleryItems = item.gallery || []; // Get chosen photos from Firebase
+
+    // Process the description line-by-line
     lines.forEach((line, index) => {
         formattedBody += `<p>${line}</p>`; 
         
-        // Every 15 lines, show the next photo from your gallery
-        if ((index + 1) % 15 === 0 && galleryIndex < galleryItems.length) {
+        // Inject images inside text ONLY if the article is long (more than 15 lines)
+        if (lines.length >= 15 && (index + 1) % 15 === 0 && galleryIndex < galleryItems.length) {
             formattedBody += `
                 <div class="article-body-image">
-                    <img src="${galleryItems[galleryIndex]}" alt="Gallery Photo ${galleryIndex + 1}">
+                    <img src="${galleryItems[galleryIndex]}" alt="News Photo">
                 </div>`;
             galleryIndex++; 
         }
     });
 
-    // 2. If there are remaining photos that haven't been shown yet, add them at the end
-    while (galleryIndex < galleryItems.length) {
-        formattedBody += `
-            <div class="article-body-image">
-                <img src="${galleryItems[galleryIndex]}" alt="Gallery Photo ${galleryIndex + 1}">
-            </div>`;
-        galleryIndex++;
+    // For short articles or remaining images: Show as a medium-sized grid at the bottom
+    if (galleryIndex < galleryItems.length) {
+        formattedBody += `<div class="article-bottom-grid">`;
+        while (galleryIndex < galleryItems.length) {
+            formattedBody += `
+                <div class="grid-image-item">
+                    <img src="${galleryItems[galleryIndex]}" alt="Gallery News Photo">
+                </div>`;
+            galleryIndex++;
+        }
+        formattedBody += `</div>`;
     }
 
     document.getElementById('article-container').innerHTML = `
@@ -147,15 +150,12 @@ window.openArticlePage = (item) => {
         </div>
         <div class="article-inner">
             <img src="${item.img}" class="main-article-img" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:450px; object-fit:cover;">
-            
             <h1 class="article-title">${item.title}</h1>
-            
             <div class="article-meta">
                 <span class="meta-item">✍️ ${item.author || "Admin"}</span>
                 <span class="meta-divider">|</span>
                 <span class="meta-item">📅 ${item.date || "Recent"}</span>
             </div>
-            
             <div class="article-body">${formattedBody}</div>
         </div>`;
 };
