@@ -69,10 +69,22 @@ function renderAds(adData) {
 
 // --- MAIN RENDERING ---
 function renderNews(category) {
-    const hm = document.getElementById('hero-main'), ng = document.getElementById('news-grid'), ticker = document.getElementById('ticker-box');
-    hm.innerHTML = ""; ng.innerHTML = "";
+    const hm = document.getElementById('hero-main'), 
+          ng = document.getElementById('news-grid'), 
+          ticker = document.getElementById('ticker-box');
+    
+    hm.innerHTML = ""; 
+    ng.innerHTML = "";
+
     const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
-    if(ticker) ticker.innerHTML = tickerNews.length > 0 ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; ") : "Welcome to Vadi E Kashmir";
+    const defaultMsg = "Welcome to Vadi E Kashmir — Your 24/7 Source for Latest News and Real-time Updates.";
+    
+    if(ticker) {
+        ticker.innerHTML = tickerNews.length > 0 
+            ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; ") 
+            : defaultMsg;
+    }
+
     const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
     const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
@@ -88,7 +100,7 @@ function renderNews(category) {
     });
 }
 
-// --- ARTICLE VIEW & SHARE ---
+// --- SMART ARTICLE VIEW WITH INJECTED IMAGES ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
 
@@ -97,6 +109,23 @@ window.openArticlePage = (item) => {
     view.style.display = 'block';
     applyTheme();
     window.scrollTo(0,0);
+    
+    // Split description into lines to inject images every 20 lines
+    const lines = item.desc.split('\n');
+    let formattedBody = "";
+    
+    lines.forEach((line, index) => {
+        formattedBody += line + "<br>";
+        
+        // Insert the main image again every 20 lines
+        if ((index + 1) % 20 === 0 && index !== lines.length - 1) {
+            formattedBody += `
+                <div class="article-body-image" style="width:100%; margin: 30px 0; border-left: 4px solid #b91c1c; padding-left: 10px;">
+                    <img src="${item.img}" style="width:100%; border-radius:8px; margin: 20px 0; max-height:300px; object-fit:cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                </div>`;
+        }
+    });
+
     const time = new Date().toLocaleTimeString([], {hour: 'numeric', minute:'2-digit', hour12: true});
     
     document.getElementById('article-container').innerHTML = `
@@ -112,7 +141,7 @@ window.openArticlePage = (item) => {
             <div class="article-meta">
                 <span>✍️ ${item.author || "Admin"}</span> | <span>📅 ${item.date || ""}</span> | <span><i class="far fa-clock"></i> ${time}</span>
             </div>
-            <div class="article-body">${item.desc}</div>
+            <div class="article-body" style="line-height: 1.8; font-size: 1.1rem;">${formattedBody}</div>
         </div>`;
 };
 
@@ -124,16 +153,10 @@ window.closeArticle = () => {
 // --- IMAGE SHARE + FINAL TEXT FORMAT ---
 window.shareNewsManual = async (title, author, id, imageUrl) => {
     const publicLink = `https://vediekashmir.netlify.app`;
-    
-    // Formatting the text: Title, Writer, Link, and Signature
     const shareText = `*${title.toUpperCase()}*\n\n✍️ Writer: ${author}\n\nRead more at:\n${publicLink}\n\n_Vadi-E-Kashmir_`;
 
     try {
-        // 1. Automatically copy Title, Writer, Link, and Signature to clipboard
         await navigator.clipboard.writeText(shareText);
-        console.log("News details copied!");
-
-        // 2. Share the actual image file
         if (navigator.share && imageUrl) {
             const response = await fetch(imageUrl);
             const blob = await response.blob();

@@ -24,7 +24,7 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
 .ticker-wrap {
     display: flex;
     align-items: center;
-    background: #b91c1c; /* Professional Dark Red */
+    background: var(--primary);
     color: white;
     height: 40px;
     overflow: hidden;
@@ -35,20 +35,37 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
 /* STATIC LEFT LABEL */
 .ticker-label {
     background: #ffffff;
-    color: #b91c1c;
+    color: var(--primary);
     padding: 0 15px;
     height: 100%;
     display: flex;
     align-items: center;
-    font-weight: 800;
-    font-size: 0.85rem;
-    z-index: 10; /* Keeps the label above the scrolling text */
+    font-weight: 900;
+    font-size: 0.8rem;
+    z-index: 10;
     position: relative;
-    box-shadow: 4px 0 8px rgba(0,0,0,0.3); /* Adds depth effect */
+    box-shadow: 5px 0 10px rgba(0,0,0,0.3);
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-/* SCROLLING AREA */
+/* Flashing dot for the 'Live' look */
+.ticker-label::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse-red 1.5s infinite;
+}
+
+@keyframes pulse-red {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
 .ticker-content-container {
     flex: 1;
     overflow: hidden;
@@ -58,11 +75,11 @@ body { font-family: 'Roboto', sans-serif; background-color: var(--light); color:
 .ticker-content {
     display: inline-block;
     padding-left: 100%;
-    animation: ticker-scroll 30s linear infinite; /* Smooth 24/7 speed */
-    font-weight: 500;
+    animation: ticker-scroll 30s linear infinite;
+    font-weight: 600;
+    font-size: 0.95rem;
 }
 
-/* SCROLL ANIMATION */
 @keyframes ticker-scroll {
     0% { transform: translate3d(0, 0, 0); }
     100% { transform: translate3d(-100%, 0, 0); }
@@ -169,8 +186,26 @@ nav a:hover, nav a.active { background: rgba(0,0,0,0.15); box-shadow: inset 0 -3
 .article-header { margin-bottom: 30px; }
 .article-header h1 { font-family: 'Playfair Display', serif; font-size: 2.5rem; line-height: 1.2; margin-bottom: 15px; }
 .article-meta { font-size: 0.9rem; color: #6b7280; font-weight: 600; display: flex; gap: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 15px; }
-.article-body { color: var(--dark); font-size: 1.2rem; line-height: 1.8; margin-top: 30px; }
+.article-body { color: var(--dark); font-size: 1.15rem; line-height: 1.8; margin-top: 30px; }
 .article-body p { margin-bottom: 20px; }
+
+/* Smart Article Injected Images */
+.article-body-image {
+    width: 100%;
+    margin: 35px 0;
+    border-left: 5px solid var(--primary); 
+    padding: 15px;
+    padding-left: 15px;
+    background: var(--primary-soft);
+    border-radius: var(--radius);
+}
+.article-body-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: var(--shadow);
+    display: block;
+}
 
 /* --- UTILS --- */
 .back-btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: var(--radius); cursor: pointer; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; }
