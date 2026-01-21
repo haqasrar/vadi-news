@@ -100,6 +100,29 @@ function renderNews(category) {
     });
 }
 
+// --- CATEGORY FILTERING LOGIC ---
+window.filterByCategory = (category) => {
+    // 1. If user is inside an article, close it first
+    const articleView = document.getElementById('article-page-view');
+    const mainContent = document.getElementById('main-content-area');
+    if (articleView) articleView.style.display = 'none';
+    if (mainContent) mainContent.style.display = 'block';
+    
+    // 2. Update visual active state on links
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        // Match 'Home' with 'all' or match the category name exactly
+        if (link.innerText.trim() === category || (category === 'all' && (link.innerText.trim() === 'Home' || link.innerHTML.includes('fa-home')))) {
+            link.classList.add('active');
+        }
+    });
+
+    // 3. Render the filtered news
+    renderNews(category);
+    window.scrollTo(0,0);
+};
+
 // --- RESPONSIVE MULTI-PHOTO DISTRIBUTION ---
 window.openArticlePage = (item) => {
     updateMetaForCrawler(item);
@@ -112,15 +135,13 @@ window.openArticlePage = (item) => {
     const lines = item.desc.split('\n');
     let formattedBody = "";
     let galleryIndex = 0;
-    const galleryItems = item.gallery || []; // Get gallery array from Firebase
+    const galleryItems = item.gallery || [];
 
-    // Smart Gap: Distribute photos evenly based on text length
     const gap = Math.max(5, Math.floor(lines.length / (galleryItems.length + 1)));
 
     lines.forEach((line, index) => {
         formattedBody += `<p>${line}</p>`; 
         
-        // Inject inside text based on the calculated gap
         if (galleryIndex < galleryItems.length && (index + 1) % gap === 0) {
             formattedBody += `
                 <div class="article-body-image">
@@ -130,7 +151,6 @@ window.openArticlePage = (item) => {
         }
     });
 
-    // Grid fallback for extra photos
     if (galleryIndex < galleryItems.length) {
         formattedBody += `<div class="article-bottom-grid">`;
         while (galleryIndex < galleryItems.length) {
