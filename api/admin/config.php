@@ -17,9 +17,9 @@ try {
         // Parse Vercel Postgres URL to PDO DSN
         $db_parts = parse_url($db_url);
         $dsn = "pgsql:" . sprintf(
-            "host=%s;port=%s;user=%s;password=%s;dbname=%s",
+            "host=%s;port=%s;user=%s;password=%s;dbname=%s;sslmode=require",
             $db_parts['host'],
-            $db_parts['port'],
+            $db_parts['port'] ?? 5432,
             $db_parts['user'],
             $db_parts['pass'],
             ltrim($db_parts['path'], "/")
