@@ -2,7 +2,7 @@
 // Using PHP/MySQL API
 
 
-let allNewsData = [];
+
 
 // --- THEME ENGINE ---
 window.toggleTheme = () => {
@@ -41,7 +41,7 @@ async function loadAllData() {
         allNewsData = data;
         // Load Ads
         try {
-            const adRes = await fetch('admin/api/get_ads.php');
+            const adRes = await fetch('api/get_ads.php');
             const adData = await adRes.json();
             if (adData) renderAds(adData);
         } catch (e) { console.log("Ad load error", e); }
@@ -57,7 +57,10 @@ async function loadAllData() {
         renderTicker();
         renderSidebarWidgets();
 
-    } catch (e) { console.error("Firebase load error", e); }
+    } catch (e) {
+        console.error("Load error", e);
+        document.getElementById('hero-grid').innerHTML = `<p style="color:red; text-align:center; padding:20px;">Error loading news. Please refresh.<br><small>${e.message}</small></p>`;
+    }
 }
 
 // --- RENDERING CONTROLLERS ---
@@ -161,7 +164,12 @@ window.filterByCategory = (category) => {
 
 function renderHeroGrid(items) {
     const container = document.getElementById('hero-grid');
-    if (!container || items.length === 0) return;
+    if (!container) return;
+
+    if (items.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px;"><h3>No news found.</h3><p>Please log in to the admin panel and add simple news items to get started.</p></div>';
+        return;
+    }
 
     let html = '';
     // Main Story (Big Left)
