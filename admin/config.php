@@ -10,10 +10,12 @@ $port = 3307;
 $conn = null;
 
 try {
-    // Check for Vercel Environment
-    if (getenv('POSTGRES_URL')) {
+    // Check for Vercel Environment (Neon/Supabase/Vercel Postgres)
+    $db_url = getenv('POSTGRES_URL') ?: getenv('DATABASE_URL');
+    
+    if ($db_url) {
         // Parse Vercel Postgres URL to PDO DSN
-        $db_parts = parse_url(getenv('POSTGRES_URL'));
+        $db_parts = parse_url($db_url);
         $dsn = "pgsql:" . sprintf(
             "host=%s;port=%s;user=%s;password=%s;dbname=%s",
             $db_parts['host'],
