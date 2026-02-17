@@ -1,7 +1,8 @@
 <?php
+session_save_path('/tmp');
 session_start();
 if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true){
-    header("Location: dashboard.php");
+    header("Location: /admin/dashboard.php");
     exit;
 }
 
@@ -17,7 +18,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     // In a real scenario, fetch hash from DB and use password_verify()
     if($username === "vadiadmin" && $password === "developer123") {
         $_SESSION['admin_logged_in'] = true;
-        header("Location: dashboard.php");
+        header("Location: /admin/dashboard.php");
         exit;
     } else {
         $error = "Invalid Credentials!";
