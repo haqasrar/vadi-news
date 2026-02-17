@@ -362,7 +362,7 @@ window.closeArticle = () => {
 };
 
 window.shareArticle = async (title, url) => {
-    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\nhttps://vediekashmir.netlify.app\n\n_Vadi-E-Kashmir_`;
+    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\nhttps://vediekashmir.vercel.app\n\n_Vadi-E-Kashmir_`;
     try {
         await navigator.clipboard.writeText(shareText);
         alert("Link copied! Open WhatsApp to paste.");
