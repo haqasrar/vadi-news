@@ -11,6 +11,8 @@ if(!$id) {
     exit;
 }
 
+
+try {
     // Check Type (Passed from dashboard)
     // Fallback: if type is missing, check if it's explicitly 'breaking' from some other source, otherwise default to standard
     $type = $data['type'] ?? 'standard';
