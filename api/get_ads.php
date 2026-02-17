@@ -1,7 +1,7 @@
 <?php
 // admin/api/get_ads.php
 header("Content-Type: application/json");
-include '../admin/config.php';
+include 'admin/config.php';
 
 // Fetch the latest manual ad (or logic for multiple)
 try {

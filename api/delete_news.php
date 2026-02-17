@@ -1,7 +1,7 @@
 <?php
 // admin/api/delete_news.php
 header("Content-Type: application/json");
-include '../admin/config.php';
+include 'admin/config.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 $id = $data['id'];

@@ -42,7 +42,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 <body>
     <div class="login-box">
-        <img src="../images/Logo.png" class="login-logo" alt="Logo">
+        <img src="/images/Logo.png" class="login-logo" alt="Logo">
         <h1>Admin Access</h1>
         <form method="POST">
             <input type="text" name="username" placeholder="Username" required>

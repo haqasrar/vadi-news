@@ -66,7 +66,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
     <div class="sidebar">
         <div class="brand">
             <div style="display:flex; align-items:center; gap:10px;">
-                <img src="../images/Logo.png" class="brand-logo" alt="Logo">
+                <img src="/images/Logo.png" class="brand-logo" alt="Logo">
                 <div style="font-weight:bold; color:#b91c1c;">VADI <span>ADMIN</span></div>
             </div>
             <a href="logout.php" class="logout-btn">Logout</a>
@@ -239,8 +239,8 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
             };
 
             try {
-                // Path adjusted for Vercel structure: ../api/
-                const response = await fetch('../api/post_news.php', {
+                // Absolute path /api/post_news.php
+                const response = await fetch('/api/post_news.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -271,7 +271,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
             };
             
             try {
-                const response = await fetch('../api/post_ticker.php', {
+                const response = await fetch('/api/post_ticker.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -283,7 +283,8 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
 
         // 3. LOAD DATA (Trending/Manage)
         async function fetchNews() {
-            const res = await fetch('../api/get_news.php');
+            // Absolute path /api/get_news.php
+            const res = await fetch('/api/get_news.php');
             return await res.json();
         }
 
@@ -303,7 +304,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
 
         async function deleteNews(id) {
             if(confirm("Delete this news?")) {
-                await fetch('../api/delete_news.php', {
+                await fetch('/api/delete_news.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({id: id})
@@ -329,7 +330,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
         }
 
         async function toggleTrend(id, status) {
-            await fetch('../api/toggle_trending.php', {
+            await fetch('/api/toggle_trending.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({id: id, status: status})
