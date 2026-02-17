@@ -227,8 +227,6 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
                 gal.push(await resizeImage(g));
             }
 
-            // Prepare FormData (mimicking JSON structure but sent as POST)
-            // Actually, sending JSON body is easier with Base64 strings
             const data = {
                 title: document.getElementById('title').value,
                 author: document.getElementById('author').value,
@@ -241,7 +239,8 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
             };
 
             try {
-                const response = await fetch('api/post_news.php', {
+                // Path adjusted for Vercel structure: ../api/
+                const response = await fetch('../api/post_news.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -272,7 +271,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
             };
             
             try {
-                const response = await fetch('api/post_ticker.php', {
+                const response = await fetch('../api/post_ticker.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -284,7 +283,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
 
         // 3. LOAD DATA (Trending/Manage)
         async function fetchNews() {
-            const res = await fetch('api/get_news.php');
+            const res = await fetch('../api/get_news.php');
             return await res.json();
         }
 
@@ -304,7 +303,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
 
         async function deleteNews(id) {
             if(confirm("Delete this news?")) {
-                await fetch('api/delete_news.php', {
+                await fetch('../api/delete_news.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({id: id})
@@ -320,8 +319,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
                 const news = await fetchNews();
                 b.innerHTML = "";
                 news.forEach(i => {
-                    if(i.type !== 'breaking') { // Filter out ticker items if they are mixed, but our schema separates them usually. 
-                                                // Actually get_news.php will likely return all news.
+                    if(i.type !== 'breaking') { 
                         const tr = document.createElement('tr');
                         tr.innerHTML = `<td>${i.title.substring(0,30)}...</td><td>${i.created_at}</td><td><input type="checkbox" ${i.is_trending == 1 ?'checked':''} onchange="toggleTrend(${i.id}, this.checked)"></td>`;
                         b.appendChild(tr);
@@ -331,7 +329,7 @@ if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true
         }
 
         async function toggleTrend(id, status) {
-            await fetch('api/toggle_trending.php', {
+            await fetch('../api/toggle_trending.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({id: id, status: status})

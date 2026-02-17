@@ -14,6 +14,7 @@ window.toggleTheme = () => {
 
 function applyTheme() {
     const isDark = localStorage.getItem('vadiTheme') === 'dark';
+    const API_URL = 'api/get_news.php'; // Updated for Vercel structure
     if (isDark) {
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('.theme-toggle-btn i');
@@ -21,10 +22,21 @@ function applyTheme() {
     }
 }
 
+// --- GLOBAL VARIABLES ---
+let allNewsData = [];
+let currentCategory = 'all';
+
+// --- INITIALIZATION ---
+document.addEventListener('DOMContentLoaded', () => {
+    loadAllData();
+    setupSearch();
+    checkUrlHash(); // Check for article ID in URL
+});
+
 // --- DATA LOADING ---
 async function loadAllData() {
     try {
-        const response = await fetch('admin/api/get_news.php');
+        const response = await fetch(API_URL);
         const data = await response.json();
         allNewsData = data;
         // Load Ads
