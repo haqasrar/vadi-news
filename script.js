@@ -256,9 +256,12 @@ function renderScrollSection(id, items) {
 function renderTicker() {
     const el = document.getElementById('breaking-ticker');
     if (el) {
-        const breaking = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
+        // Debugging: Log what we are trying to render
+        const breaking = allNewsData.filter(n => (n.type === 'breaking' || n.category === 'breaking' || n.category === 'Updates'));
+        console.log("Ticker Items Found:", breaking);
+
         if (breaking.length > 0) {
-            el.innerHTML = breaking.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; ");
+            el.innerHTML = breaking.map(n => `🔴 ${n.title}`).join("&nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp;");
         } else {
             el.innerHTML = "Welcome to Vadi E Kashmir — Your Source for Truth.";
         }
