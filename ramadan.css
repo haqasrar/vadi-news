@@ -15,6 +15,8 @@ body {
 .main-nav,
 .breaking-news-container,
 .footer {
+    position: relative;
+    z-index: 10;
     background-color: rgba(15, 23, 42, 0.6) !important;
     border: 1px solid rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(10px) !important;
