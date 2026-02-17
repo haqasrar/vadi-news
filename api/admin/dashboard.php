@@ -302,8 +302,8 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
 
         // 3. LOAD DATA (Trending/Manage)
         async function fetchNews() {
-            // Absolute path /api/get_news.php
-            const res = await fetch('/api/get_news.php');
+            // Absolute path /api/get_news.php with cache busting
+            const res = await fetch('/api/get_news.php?_=' + new Date().getTime());
             return await res.json();
         }
 

@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- DATA LOADING ---
 async function loadAllData() {
     try {
-        const response = await fetch(API_URL);
+        // Add cache busting to prevent stale data on Vercel
+        const response = await fetch(API_URL + '?_=' + new Date().getTime());
         const data = await response.json();
         allNewsData = data;
         // Load Ads
