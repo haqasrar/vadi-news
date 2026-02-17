@@ -14,6 +14,22 @@
             "destination": "/api/admin/:path*"
         },
         {
+            "source": "/api/share.php",
+            "destination": "/api/share.php"
+        },
+        {
+            "source": "/api/post_ticker.php",
+            "destination": "/api/post_ticker.php"
+        },
+        {
+            "source": "/api/delete_news.php",
+            "destination": "/api/delete_news.php"
+        },
+        {
+            "source": "/api/update_ads.php",
+            "destination": "/api/update_ads.php"
+        },
+        {
             "source": "/news/:id",
             "destination": "/api/share.php?id=:id"
         }

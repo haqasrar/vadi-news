@@ -265,6 +265,11 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
         // 2. TICKER
         document.getElementById('tickerForm').addEventListener('submit', async(e)=>{
             e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.disabled = true;
+            btn.innerText = "Adding...";
+
             const data = {
                 title: document.getElementById('tickerTitle').value,
                 link: document.getElementById('tickerLink').value
@@ -276,9 +281,23 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-                alert("Ticker Updated!"); 
-                e.target.reset();
-            } catch(err) { console.error(err); }
+                
+                // Parse JSON response
+                const result = await response.json();
+                
+                if(result.success) {
+                    alert("✅ Ticker Added Successfully!"); 
+                    e.target.reset();
+                } else {
+                    alert("❌ Error: " + (result.error || result.message || "Failed to add ticker"));
+                }
+            } catch(err) { 
+                console.error(err); 
+                alert("Network Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
         });
 
         // 3. LOAD DATA (Trending/Manage)

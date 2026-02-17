@@ -11,8 +11,12 @@ $link = $data['link'];
 try {
     $stmt = $conn->prepare("INSERT INTO ticker (title, link) VALUES (?, ?)");
     $success = $stmt->execute([$title, $link]);
-    echo json_encode(["success"=>$success]);
+    if ($success) {
+        echo json_encode(["success" => true, "message" => "Ticker added"]);
+    } else {
+        echo json_encode(["success" => false, "message" => "Database insert failed"]);
+    }
 } catch(PDOException $e) {
-    echo json_encode(["success"=>false, "error"=>$e->getMessage()]);
+    http_response_code(500);
+    echo json_encode(["success" => false, "error" => $e->getMessage()]);
 }
-
