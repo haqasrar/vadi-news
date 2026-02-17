@@ -1,7 +1,6 @@
 <?php
-session_save_path('/tmp');
-session_start();
-if(isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true){
+// Check for Cookie
+if(isset($_COOKIE['admin_token']) && $_COOKIE['admin_token'] === md5("vadi_secure_9988")) {
     header("Location: /admin/dashboard.php");
     exit;
 }
@@ -17,7 +16,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     // Simple check for the default credential requested by user "vadiadmin", "developer123"
     // In a real scenario, fetch hash from DB and use password_verify()
     if($username === "vadiadmin" && $password === "developer123") {
-        $_SESSION['admin_logged_in'] = true;
+        // Set Secure Cookie instead of Session (expires in 24 hours)
+        setcookie("admin_token", md5("vadi_secure_9988"), time() + 86400, "/", "", true, true);
         header("Location: /admin/dashboard.php");
         exit;
     } else {

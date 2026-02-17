@@ -1,8 +1,7 @@
 <?php
-session_save_path('/tmp');
-session_start();
-if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true){
-    header("Location: index.php");
+// Check Cookie instead of Session
+if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secure_9988")){
+    header("Location: /admin/index.php"); 
     exit;
 }
 ?>
