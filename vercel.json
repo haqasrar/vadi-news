@@ -12,6 +12,10 @@
         {
             "source": "/admin/:path*",
             "destination": "/api/admin/:path*"
+        },
+        {
+            "source": "/news/:id",
+            "destination": "/api/share.php?id=:id"
         }
     ]
 }

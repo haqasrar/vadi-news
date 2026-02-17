@@ -354,7 +354,7 @@ window.openArticlePage = (item) => {
         </div>
         <div class="art-body">${formattedBody}</div>
         <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
-            <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.img}')" 
+            <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.id}')" 
                 style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px;">
                 <i class="fab fa-whatsapp"></i> Share this News
             </button>
@@ -370,13 +370,25 @@ window.closeArticle = () => {
     document.title = "Vadi E Kashmir | Your Trusted News Source";
 };
 
-window.shareArticle = async (title, url) => {
-    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\nhttps://vediekashmir.vercel.app\n\n_Vadi-E-Kashmir_`;
+window.shareArticle = async (title, id) => {
+    // New Share URL with Preview Support
+    const shareUrl = `https://vediekashmir.vercel.app/news/${id}`;
+
+    const shareText = `*${title.toUpperCase()}*\n\nRead full story:\n${shareUrl}\n\nTeam Vadi-E-Kashmir`;
+
     try {
-        await navigator.clipboard.writeText(shareText);
-        alert("Link copied! Open WhatsApp to paste.");
-        window.open('https://wa.me/');
+        // Try native share if on mobile
+        if (navigator.share) {
+            await navigator.share({
+                title: title,
+                text: shareText,
+                url: shareUrl
+            });
+        } else {
+            throw new Error("No native share");
+        }
     } catch (e) {
+        // Fallback to WhatsApp
         window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`);
     }
 };
