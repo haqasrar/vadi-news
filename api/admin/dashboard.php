@@ -323,13 +323,24 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
         }
 
         async function deleteNews(id, type) {
-            if(confirm("Delete this item?")) {
-                await fetch('/api/delete_news.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({id: id, type: type})
-                });
-                loadManage();
+            if(confirm("Delete this " + (type || 'news') + " item?")) {
+                try {
+                    const response = await fetch('/api/delete_news.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({id: id, type: type})
+                    });
+                    const result = await response.json();
+                    if(result.success) {
+                        alert("Deleted!");
+                        loadManage();
+                    } else {
+                        alert("Failed to delete: " + (result.error || "Unknown error"));
+                        console.error(result);
+                    }
+                } catch(e) {
+                    alert("Network Error: " + e.message);
+                }
             }
         }
 
