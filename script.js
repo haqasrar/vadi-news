@@ -1,5 +1,6 @@
 // Removed Firebase Imports
 // Using PHP/MySQL API
+const API_URL = 'api/get_news.php';
 
 
 
@@ -14,7 +15,7 @@ window.toggleTheme = () => {
 
 function applyTheme() {
     const isDark = localStorage.getItem('vadiTheme') === 'dark';
-    const API_URL = 'api/get_news.php'; // Updated for Vercel structure
+
     if (isDark) {
         document.body.classList.add('dark-mode');
         const icon = document.querySelector('.theme-toggle-btn i');
