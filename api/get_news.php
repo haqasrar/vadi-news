@@ -1,7 +1,7 @@
 <?php
 // admin/api/get_news.php
 header("Content-Type: application/json");
-include 'admin/config.php';
+include __DIR__ . '/admin/config.php';
 
 // Fetch News
 try {

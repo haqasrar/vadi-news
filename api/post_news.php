@@ -1,7 +1,7 @@
 <?php
 // admin/api/post_news.php
 header("Content-Type: application/json");
-include 'admin/config.php';
+include __DIR__ . '/admin/config.php';
 
 // Decode JSON
 $data = json_decode(file_get_contents("php://input"), true);
