@@ -12,14 +12,21 @@ if(!$id) {
 }
 
 try {
-    // Delete Record (Cascade deletes gallery via foreign key if set, or manual delete)
-    // Even if images are base64 in DB, we just delete the rows.
-    
-    $stmt = $conn->prepare("DELETE FROM news_gallery WHERE news_id = ?");
-    $stmt->execute([$id]);
+    // Check Type (Passed from dashboard)
+    $type = $data['type'] ?? 'standard';
 
-    $stmt2 = $conn->prepare("DELETE FROM news WHERE id = ?");
-    $success = $stmt2->execute([$id]);
+    if ($type === 'breaking') {
+        // Delete from Ticker
+        $stmt = $conn->prepare("DELETE FROM ticker WHERE id = ?");
+        $success = $stmt->execute([$id]);
+    } else {
+        // Delete from News
+        $stmt = $conn->prepare("DELETE FROM news_gallery WHERE news_id = ?");
+        $stmt->execute([$id]);
+
+        $stmt2 = $conn->prepare("DELETE FROM news WHERE id = ?");
+        $success = $stmt2->execute([$id]);
+    }
 
     echo json_encode(["success"=>$success]);
 

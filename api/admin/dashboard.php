@@ -296,18 +296,19 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                 b.innerHTML = "";
                 news.forEach(i => {
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${i.title.substring(0,30)}...</td><td>${i.category||i.type}</td><td><button class="delete-btn" onclick="deleteNews(${i.id})">Delete</button></td>`;
+                    // Pass ID and Type to delete function
+                    tr.innerHTML = `<td>${i.title.substring(0,30)}...</td><td>${i.category||i.type}</td><td><button class="delete-btn" onclick="deleteNews(${i.id}, '${i.type}')">Delete</button></td>`;
                     b.appendChild(tr);
                 });
             } catch(e) { b.innerHTML = "Error loading news."; }
         }
 
-        async function deleteNews(id) {
-            if(confirm("Delete this news?")) {
+        async function deleteNews(id, type) {
+            if(confirm("Delete this item?")) {
                 await fetch('/api/delete_news.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({id: id})
+                    body: JSON.stringify({id: id, type: type})
                 });
                 loadManage();
             }
