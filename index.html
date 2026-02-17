@@ -1,142 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vadi E Kashmir</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1558476577024315"
-     crossorigin="anonymous"></script>
-    <meta property="og:type" content="article">
-    <meta property="og:title" id="meta-title" content="Vadi E Kashmir | Latest Updates">
-    <meta property="og:description" content="Stay informed with the latest news from Jammu & Kashmir.">
-    
+    <title>Vadi E Kashmir | Your Trusted News Source</title>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700;900&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- SEO Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" id="meta-title" content="Vadi E Kashmir | Latest News & Updates">
+    <meta property="og:description"
+        content="Stay informed with the latest news from Jammu & Kashmir, Nation, and the World.">
     <meta property="og:image" id="meta-image" content="https://vediekashmir.netlify.app/images/Logo.png">
     <meta property="og:url" content="https://vediekashmir.netlify.app/">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <!-- AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1558476577024315"
+        crossorigin="anonymous"></script>
 </head>
+
 <body>
 
-    <div class="ticker-wrap">
-    <div class="ticker-label">BREAKING</div>
-    <div class="ticker-content-container">
-        <div class="ticker-content" id="ticker-box">
-            Welcome to Vadi E Kashmir — Your 24/7 Source for Latest News and Real-time Updates.
-        </div>
-    </div>
-</div>
-
-    <div id="main-content-area">
-        <header>
-            <div class="header-top">
-                <div class="brand-area">
-                    <img src="images/Logo.png" class="main-logo" alt="Logo">
-                    <div class="logo-text">VADI <span>E KASHMIR</span></div>
-                </div>
-                <button class="theme-btn" onclick="toggleTheme()">
+    <!-- 1. TOP BAR (Date, Socials, Theme) -->
+    <div class="top-bar">
+        <div class="container top-bar-inner">
+            <div class="top-left">
+                <button class="theme-toggle-btn" onclick="toggleTheme()">
                     <i class="fas fa-moon"></i>
                 </button>
+                <div class="date-display" id="current-date">Thinking...</div>
             </div>
 
-            <div class="nav-wrapper">
-                <nav>
-    <a onclick="filterByCategory('all')" class="active">Home</a>
-    <a onclick="filterByCategory('J & K')">J & K</a>
-    <a onclick="filterByCategory('Nation')">Nation</a>
-    <a onclick="filterByCategory('Updates')">Updates</a>
-    <a onclick="filterByCategory('Business')">Business</a>
-</nav>
-            </div>
-        </header>
-
-        <div class="container">
-            <div class="layout-grid">
-                <main>
-                    <div class="magazine-hero" id="hero-section">
-                        <div id="hero-main"></div>
-                    </div>
-
-                    <h2 class="section-title" id="feed-title">Latest Headlines</h2>
-                    <div class="news-grid" id="news-grid"></div>
-                </main>
-
-                <aside>
-                    <div class="sidebar-widget">
-                        <h3 class="widget-title">Search News</h3>
-                        <div class="search-box-wrapper">
-                            <input type="text" class="search-input" id="searchInput" placeholder="Type to search..." onkeyup="performSearch(this)">
-                            <i class="fas fa-search search-icon"></i>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-widget">
-                        <h3 class="widget-title">Trending News</h3>
-                        <ul id="trending-list" class="trending-list">
-                            </ul>
-                    </div>
-
-                    <div class="sidebar-widget ad-widget">
-                        <span class="ad-label">Advertisement</span>
-                        <div id="ad-slot" class="ad-container">
-                            </div>
-                    </div>
-
-                    <div class="sidebar-widget awareness-widget">
-                        <div class="awareness-header"><i class="fas fa-bullhorn"></i> Daily Awareness</div>
-                        <div id="auto-message" class="awareness-content">Loading...</div>
-                        <div class="awareness-footer">Auto-generated Daily</div>
-                    </div>
-
-                    <div class="sidebar-widget profile-widget">
-                        <h3 class="widget-title">About Team</h3>
-                        <div class="profile-section">
-                            <img src="images/image.jpeg" class="profile-pic" alt="Faisal">
-                            <div class="profile-role">Founder of Vadi-e-Kashmir</div>
-                            <div class="profile-name">Faisal Khan</div>
-                             <p class="profile-bio">I am pursuing Automobile Engineering in the heart of Kashmir Srinagar and I completed my Class 10 education from RANA Army Good will School Hajin.Recently I was honored with an award by Youth Inspiration and Movie Maker by Hand 3rd sector Army Officer.Although I am not a journalist. I have actively highlighted public grievances with the support and cooperation of local administration.<br> <b>Founder Vadi-e-Kashmir</b></p>
-                            <div class="profile-socials">
-                                <a href="https://www.facebook.com/share/14WPeSLnhXg/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
-                                <a href="https://www.instagram.com/driftsoulkhan/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
-                                <a href="https://x.com/MrFaisalPathan1" class="social-icon-btn tw-bg"><i class="fab fa-twitter"></i></a>
-                            </div>
-                        </div>
-                        <div class="profile-separator"></div>
-                        <div class="profile-section">
-                            <img src="images/Asrar.jpg" class="profile-pic" alt="Asrar">
-                            <div class="profile-role">Developer</div>
-                            <div class="profile-name">Haq Asrar</div>
-                            <p class="profile-bio">Hi, I’m Asrar, currently pursuing engineering and passionate about developing mobile apps and modern websites. I enjoy building clean, functional, and user-friendly digital solutions. If you’re looking for a reliable website or mobile application for your project or business, feel free to get in touch for a professional collaboration.</p>
-                            <div class="profile-socials">
-                                <a href="https://www.facebook.com/share/181H58vCdm/" class="social-icon-btn fb-bg"><i class="fab fa-facebook-f"></i></a>
-                                <a href="https://www.instagram.com/koshur.coder/" class="social-icon-btn insta-bg"><i class="fab fa-instagram"></i></a>
-                                <a href="https://x.com/Haq1Asrar" class="social-icon-btn tw-bg"><i class="fab fa-twitter"></i></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="sidebar-widget">
-                        <h3 class="widget-title">Contact Us</h3>
-                        <ul class="contact-list">
-                            <li><a href="https://chat.whatsapp.com/HML8Jrqk1CF6VdVNHuVqiD" class="social-link"><img src="images/whatsapp.png" alt="WA"> Join Group</a></li>
-                            <li><a href="https://www.facebook.com/share/1FVQaZpSB5/" class="social-link"><img src="images/facebook.png" alt="FB"> Facebook</a></li>
-                            <li><a href="https://www.instagram.com/vadiekashmir2025?igsh=MTM1ajh4cmQyYjA2bA==" class="social-link"><img src="images/instagram.png" alt="IG"> Instagram</a></li>
-                            <li><a href="https://x.com/MrFaisalPathan1" class="social-link"><img src="images/twitter.png" alt="X"> Twitter / X</a></li>
-                        </ul>
-                    </div>
-                </aside>
+            <div class="social-mini">
+                <a href="https://www.facebook.com/share/14WPeSLnhXg/"><i class="fab fa-facebook-f"></i></a>
+                <a href="https://x.com/MrFaisalPathan1"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.instagram.com/driftsoulkhan/"><i class="fab fa-instagram"></i></a>
+                <a href="https://chat.whatsapp.com/HML8Jrqk1CF6VdVNHuVqiD"><i class="fab fa-whatsapp"></i></a>
             </div>
         </div>
-
-        <footer>&copy; 2022 Vadi E Kashmir. All Rights Reserved.</footer>
     </div>
 
-    <div id="article-page-view" style="display:none;">
-        <div class="article-inner" id="article-container">
+    <!-- 2. MAIN HEADER (Logo & Ad) -->
+    <header class="main-header">
+        <div class="container header-inner">
+            <!-- Centered Logo Layout -->
+            <div class="brand-centered">
+                <a href="#" class="brand-logo-center">
+                    <img src="images/Logo.png" alt="Vadi E Kashmir Logo">
+                    <div class="brand-text-center">
+                        <h1>VADI E KASHMIR</h1>
+                        <span class="tagline">The Voice of the Valley</span>
+                    </div>
+                </a>
             </div>
+
+            <!-- Optional Ad Space (Hidden on mobile, centered on desktop if needed) -->
+            <!-- <div class="header-ad-space" id="header-ad"> -->
+            <!-- Ad Placeholder -->
+            <!-- </div> -->
+        </div>
+    </header>
+
+    <!-- 3. NAVIGATION (Sticky) -->
+    <nav class="main-nav" id="main-nav">
+        <div class="container nav-inner">
+            <ul class="nav-links">
+                <li><a onclick="filterByCategory('all')" class="active"><i class="fas fa-home"></i> Home</a></li>
+                <li><a onclick="filterByCategory('J & K')">J & K</a></li>
+                <li><a onclick="filterByCategory('Nation')">Nation</a></li>
+                <li><a onclick="filterByCategory('World')">World</a></li>
+                <li><a onclick="filterByCategory('Business')">Business</a></li>
+                <li><a onclick="filterByCategory('Sports')">Sports</a></li>
+                <li><a onclick="filterByCategory('Education')">Education</a></li>
+                <li><a onclick="filterByCategory('Videos')">Videos <i class="fas fa-play-circle"></i></a></li>
+            </ul>
+            <div class="nav-search">
+                <input type="text" placeholder="Search news..." id="navSearchInput" onkeyup="performSearch(this)">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fas fa-bars"></i></button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobile-menu">
+        <div class="mobile-menu-content">
+            <button class="close-menu" onclick="toggleMobileMenu()">&times;</button>
+            <a onclick="filterByCategory('all'); toggleMobileMenu()">Home</a>
+            <a onclick="filterByCategory('J & K'); toggleMobileMenu()">J & K</a>
+            <a onclick="filterByCategory('Nation'); toggleMobileMenu()">Nation</a>
+            <a onclick="filterByCategory('World'); toggleMobileMenu()">World</a>
+            <a onclick="filterByCategory('Business'); toggleMobileMenu()">Business</a>
+            <a onclick="filterByCategory('Sports'); toggleMobileMenu()">Sports</a>
+            <a onclick="filterByCategory('Education'); toggleMobileMenu()">Education</a>
+            <a onclick="filterByCategory('Videos'); toggleMobileMenu()">Videos</a>
+        </div>
     </div>
 
-    <script type="module" src="script.js"></script>
+    <!-- 4. BREAKING NEWS TICKER -->
+    <div class="breaking-news-container">
+        <div class="breaking-label">BREAKING NEWS</div>
+        <div class="breaking-marquee">
+            <div class="marquee-content" id="breaking-ticker">
+                Loading latest updates...
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT AREA -->
+    <div id="main-content-area" class="main-container">
+
+        <!-- 5. HERO GRID SECTION -->
+        <section class="hero-section container" id="hero-section">
+            <div class="hero-grid-layout" id="hero-grid">
+                <!-- Javascript will inject: 
+                 1. Main Lead Story (Left Large)
+                 2. Sub Lead Story 1 (Right Top)
+                 3. Sub Lead Story 2 (Right Bottom)
+            -->
+                <div class="hero-skeleton">Loading Top Stories...</div>
+            </div>
+        </section>
+
+        <!-- 6. CONTENT BLOCK Layout (Main Content + Sidebar) -->
+        <div class="container content-wrapper">
+
+            <!-- LEFT COLUMN (News Feed) -->
+            <main class="news-feed-column">
+
+                <!-- Category Section: J & K -->
+                <div class="category-block">
+                    <div class="section-header">
+                        <h2><span class="accent-color">J & K</span> Updates</h2>
+                        <a onclick="filterByCategory('J & K')" class="view-all">View All <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="category-grid" id="cat-jk-grid"></div>
+                </div>
+
+                <!-- Visual Break / Big Picture -->
+                <div class="big-picture-section" id="big-picture-slot">
+                    <!-- High quality image banner injected here -->
+                </div>
+
+                <!-- Category Section: Nation -->
+                <div class="category-block">
+                    <div class="section-header">
+                        <h2><span class="accent-color">National</span> News</h2>
+                        <a onclick="filterByCategory('Nation')" class="view-all">View All <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <div class="list-layout" id="cat-nation-list"></div>
+                </div>
+
+                <!-- Category Section: Sports -->
+                <div class="category-block">
+                    <div class="section-header">
+                        <h2><span class="accent-color">Sports</span> Arena</h2>
+                        <a onclick="filterByCategory('Sports')" class="view-all">View All <i
+                                class="fas fa-arrow-right"></i></a>
+                    </div>
+                    <!-- Horizontal Scroll for Sports -->
+                    <div class="scrolling-row" id="cat-sports-scroll"></div>
+                </div>
+
+                <!-- Video Section Placeholder to prevent JS error -->
+                <div id="video-section" style="display:none;"></div>
+
+            </main>
+
+            <!-- RIGHT COLUMN ... -->
+
+
+            <!-- RIGHT COLUMN (Sidebar) -->
+            <aside class="sidebar-column">
+
+                <!-- Social Follow Widget -->
+                <div class="sidebar-widget social-widget">
+                    <h3>Follow Us</h3>
+                    <div class="social-grid">
+                        <a href="https://www.facebook.com/share/14WPeSLnhXg/" class="s-btn fb"><i
+                                class="fab fa-facebook-f"></i> <span>20K</span></a>
+                        <a href="https://x.com/MrFaisalPathan1" class="s-btn tw"><i class="fab fa-twitter"></i>
+                            <span>5K</span></a>
+                        <a href="https://www.instagram.com/driftsoulkhan/" class="s-btn in"><i
+                                class="fab fa-instagram"></i> <span>12K</span></a>
+                        <a href="https://chat.whatsapp.com/HML8Jrqk1CF6VdVNHuVqiD" class="s-btn wa"><i
+                                class="fab fa-whatsapp"></i> <span>Join</span></a>
+                    </div>
+                </div>
+
+                <!-- Trending / Most Read Tabs -->
+                <div class="sidebar-widget tab-widget">
+                    <div class="tab-headers">
+                        <button class="tab-btn active" onclick="switchTab('trending')">Trending</button>
+                        <button class="tab-btn" onclick="switchTab('latest')">Just In</button>
+                    </div>
+                    <div class="tab-content" id="sidebar-tab-content">
+                        <!-- List injected here -->
+                    </div>
+                </div>
+
+                <!-- Ad Widget -->
+                <div class="sidebar-widget ad-widget">
+                    <span>Advertisement</span>
+                    <div id="sidebar-ad-slot" class="sidebar-ad-box"></div>
+                </div>
+
+                <!-- Daily Awareness -->
+                <div class="sidebar-widget awareness-widget">
+                    <h3><i class="fas fa-lightbulb"></i> Daily Thought</h3>
+                    <div id="daily-quote" class="quote-box">Loading...</div>
+                </div>
+
+            </aside>
+
+        </div> <!-- End Content Wrapper -->
+
+    </div> <!-- End Main Content Area -->
+
+    <!-- ARTICLE READING VIEW (Overlay) -->
+    <div id="article-page-view" class="article-overlay">
+        <div class="article-container">
+            <div class="article-controls">
+                <button onclick="closeArticle()" class="close-article-btn"><i class="fas fa-arrow-left"></i> Back to
+                    News</button>
+            </div>
+            <div id="article-content-wrapper">
+                <!-- Dynamic Article Content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-col brand-col">
+                <img src="images/Logo.png" alt="Logo" class="footer-logo">
+                <p>Vadi E Kashmir is your trusted source for unbiased news from the valley and beyond. Dedicated to
+                    truth and transparency.</p>
+            </div>
+            <div class="footer-col links-col">
+                <h4>Quick Links</h4>
+                <a onclick="filterByCategory('all')">Home</a>
+                <a onclick="filterByCategory('J & K')">J & K News</a>
+                <a href="#about">About Us</a>
+                <a href="#contact">Contact</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+            <div class="footer-col contact-col">
+                <h4>Contact Us</h4>
+                <p><i class="fas fa-envelope"></i> contact@vadiekashmir.com</p>
+                <p><i class="fas fa-phone"></i> +91 70068 00000</p>
+                <p><i class="fas fa-map-marker-alt"></i> Srinagar, J&K, India</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Vadi E Kashmir. All Rights Reserved. | <span class="dev-credit">Designed by Haq Asrar</span>
+            </p>
+        </div>
+    </footer>
+
+    <script type="module" src="script.js?v=2"></script>
+    <script>
+        // Simple client-side date
+        const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', options);
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+    </script>
 </body>
+
 </html>

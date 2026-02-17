@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>API Debugger</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #222;
+            color: #0f0;
+        }
+
+        .status {
+            padding: 10px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            color: #0f0;
+            border-color: #0f0;
+        }
+
+        .error {
+            color: #ff5555;
+            border-color: #ff5555;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #111;
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>API Connection Test</h1>
+    <div id="status" class="status">Connecting...</div>
+    <div id="output"></div>
+
+    <script>
+        const statusEl = document.getElementById('status');
+        const outputEl = document.getElementById('output');
+
+        async function testApi() {
+            try {
+                statusEl.innerText = "Fetching admin/api/get_news.php...";
+
+                const response = await fetch('admin/api/get_news.php');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                }
+
+                const text = await response.text();
+                statusEl.innerText = "Response received. Parsing JSON...";
+
+                try {
+                    const json = JSON.parse(text);
+                    statusEl.innerText = "✅ SUCCESS: Valid JSON received with " + json.length + " items.";
+                    statusEl.className = "status success";
+                    outputEl.innerHTML = "<h3>First Item Preview:</h3><pre>" + JSON.stringify(json[0], null, 2) + "</pre>";
+                } catch (e) {
+                    statusEl.innerText = "❌ JSON PARSE ERROR: The server returned text, but it's not valid JSON.";
+                    statusEl.className = "status error";
+                    outputEl.innerHTML = "<h3>Raw Server Output (Look for PHP errors):</h3><pre>" + text.replace(/</g, "&lt;") + "</pre>";
+                }
+
+            } catch (err) {
+                statusEl.innerText = "❌ NETWORK/FETCH ERROR: " + err.message;
+                statusEl.className = "status error";
+            }
+        }
+
+        testApi();
+    </script>
+</body>
+
+</html>

@@ -1,17 +1,6 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+// Removed Firebase Imports
+// Using PHP/MySQL API
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAj1lPZymdb6jSPrf8ZSfBIIlvc-7JqLho",
-    authDomain: "vadi-e-kashmir.firebaseapp.com",
-    projectId: "vadi-e-kashmir",
-    storageBucket: "vadi-e-kashmir.firebasestorage.app",
-    messagingSenderId: "330323093016",
-    appId: "1:330323093016:web:a4204fac189bf119b5c56d"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
 
 let allNewsData = [];
 
@@ -19,233 +8,385 @@ let allNewsData = [];
 window.toggleTheme = () => {
     const isDark = document.body.classList.toggle('dark-mode');
     localStorage.setItem('vadiTheme', isDark ? 'dark' : 'light');
-    applyTheme();
+    const icon = document.querySelector('.theme-toggle-btn i');
+    if (icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
 };
 
 function applyTheme() {
     const isDark = localStorage.getItem('vadiTheme') === 'dark';
-    if (isDark) document.body.classList.add('dark-mode');
-    else document.body.classList.remove('dark-mode');
-    const icon = document.querySelector('.theme-btn i');
-    if(icon) icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    if (isDark) {
+        document.body.classList.add('dark-mode');
+        const icon = document.querySelector('.theme-toggle-btn i');
+        if (icon) icon.className = 'fas fa-sun';
+    }
 }
 
 // --- DATA LOADING ---
 async function loadAllData() {
     try {
-        const querySnapshot = await getDocs(query(collection(db, "news"), orderBy("id", "desc")));
-        allNewsData = querySnapshot.docs.map(doc => ({ fbId: doc.id, ...doc.data() }));
-        
-        const adDocRef = doc(db, "settings", "ads");
-        const adDocSnap = await getDoc(adDocRef);
+        const response = await fetch('admin/api/get_news.php');
+        const data = await response.json();
+        allNewsData = data;
+        // Load Ads
+        try {
+            const adRes = await fetch('admin/api/get_ads.php');
+            const adData = await adRes.json();
+            if (adData) renderAds(adData);
+        } catch (e) { console.log("Ad load error", e); }
 
-        renderNews('all');
-        renderTrending(); 
-        
-        if (adDocSnap.exists()) {
-            renderAds(adDocSnap.data()); 
-        }
+        // Initial Render
+        // Fix Date Issue (Backend sends created_at, Frontend uses date)
+        allNewsData = allNewsData.map(item => ({
+            ...item,
+            date: item.created_at || item.date // Fallback
+        }));
+
+        renderHomeLayout();
+        renderTicker();
+        renderSidebarWidgets();
+
     } catch (e) { console.error("Firebase load error", e); }
 }
 
-// --- RENDER TRENDING ---
-function renderTrending() {
-    const tl = document.getElementById('trending-list');
-    if (!tl) return;
-    tl.innerHTML = "";
-    const trendingNews = allNewsData.filter(n => n.isTrending === true).slice(0, 5);
-    trendingNews.forEach((n, index) => {
-        const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        tl.innerHTML += `<li class="trending-item" onclick='openArticlePage(${safe})'><span class="trending-rank">0${index + 1}</span><div class="trending-text">${n.title}</div></li>`;
-    });
-}
+// --- RENDERING CONTROLLERS ---
 
-// --- RENDER ADS ---
-function renderAds(adData) {
-    const adSlot = document.getElementById('ad-slot');
-    if (!adSlot || !adData) return;
-    adSlot.innerHTML = `<a href="${adData.link || '#'}" target="_blank"><img src="${adData.img}" alt="${adData.bio || 'Ad'}" style="width:100%; height:auto; display:block;"></a>`;
-}
+function renderHomeLayout() {
+    // 1. Reset Visibility
+    document.getElementById('hero-section').style.display = 'block';
 
-// --- MAIN RENDERING ---
-function renderNews(category) {
-    const hm = document.getElementById('hero-main'), 
-          ng = document.getElementById('news-grid'), 
-          ticker = document.getElementById('ticker-box');
-    
-    hm.innerHTML = ""; 
-    ng.innerHTML = "";
+    // 2. Render Hero (Top 3)
+    // Priority: Type='hero' -> Type='breaking' -> Recent
+    let heroes = allNewsData.filter(n => n.type === 'hero');
+    if (heroes.length < 3) {
+        const others = allNewsData.filter(n => n.type !== 'hero' && n.img).slice(0, 3 - heroes.length);
+        heroes = [...heroes, ...others];
+    }
+    renderHeroGrid(heroes);
 
-    const tickerNews = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
-    const defaultMsg = "Welcome to Vadi E Kashmir — Your 24/7 Source for Latest News and Real-time Updates.";
-    
-    if(ticker) {
-        ticker.innerHTML = tickerNews.length > 0 
-            ? tickerNews.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; ") 
-            : defaultMsg;
+    // 3. Render J&K Section (Grid)
+    const jkNews = allNewsData.filter(n => n.category === 'J & K' || n.category === 'Kashmir').slice(0, 4);
+    renderGridSection('cat-jk-grid', jkNews);
+
+    // 4. Render Nation Section (List)
+    const nationNews = allNewsData.filter(n => n.category === 'Nation' || n.category === 'India').slice(0, 5);
+    renderListSection('cat-nation-list', nationNews);
+
+    // 5. Render Sports Section (Scroll)
+    const sportsNews = allNewsData.filter(n => n.category === 'Sports').slice(0, 6);
+    renderScrollSection('cat-sports-scroll', sportsNews);
+
+    // 6. Big Picture (Visual)
+    const visualNews = allNewsData.find(n => n.img && n.category !== 'Videos' && !heroes.includes(n));
+    if (visualNews) {
+        document.getElementById('big-picture-slot').innerHTML = `
+            <div class="article-card" onclick='openArticlePage(${safeJSON(visualNews)})' style="position:relative; height:300px; border:none; cursor:pointer;">
+                <img src="${visualNews.img}" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.7);">
+                <div style="position:absolute; bottom:20px; left:20px; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
+                    <span style="background:var(--primary); padding:4px 8px; font-weight:700; font-size:0.7rem; margin-bottom:10px; display:inline-block;">IN PICTURES</span>
+                    <h2 style="font-family:var(--font-heading); font-size:1.8rem; margin:0;">${visualNews.title}</h2>
+                </div>
+            </div>
+        `;
     }
 
-    const feedNews = allNewsData.filter(n => n.type !== 'breaking' && n.category !== 'Updates');
-    const filtered = category === 'all' ? feedNews : feedNews.filter(n => n.category === category);
 
-    if (category === 'all' && filtered.length > 0) {
-        const top = filtered[0];
-        hm.innerHTML = `<div class="hero-card" onclick='openArticlePage(${JSON.stringify(top).replace(/'/g, "&#39;")})'><img src="${top.img}"><div class="overlay"><span class="writer-top">✍️ ${top.author || "Admin"}</span><h2>${top.title}</h2></div></div>`;
-    }
-
-    filtered.forEach((n, idx) => {
-        if(category === 'all' && idx === 0) return; 
-        const safe = JSON.stringify(n).replace(/'/g, "&#39;");
-        ng.innerHTML += `<div class="news-card-modern" onclick='openArticlePage(${safe})'><div class="card-img-wrap"><img src="${n.img}"><div class="card-tag">${n.category}</div></div><div class="card-content"><div class="writer-under-title">✍️ ${n.author || "Admin"}</div><h3>${n.title}</h3><div class="card-footer"><span>📅 ${n.date || "Recent"}</span></div></div></div>`;
-    });
 }
 
-// --- CATEGORY FILTERING LOGIC ---
+// Reuse for Category Switching
 window.filterByCategory = (category) => {
-    // 1. If user is inside an article, close it first
-    const articleView = document.getElementById('article-page-view');
-    const mainContent = document.getElementById('main-content-area');
-    if (articleView) articleView.style.display = 'none';
-    if (mainContent) mainContent.style.display = 'block';
-    
-    // 2. Update visual active state on links
-    const navLinks = document.querySelectorAll('nav a');
-    navLinks.forEach(link => {
-        link.classList.remove('active');
-        // Match 'Home' with 'all' or match the category name exactly
-        if (link.innerText.trim() === category || (category === 'all' && (link.innerText.trim() === 'Home' || link.innerHTML.includes('fa-home')))) {
-            link.classList.add('active');
-        }
-    });
+    // Active State
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    // Find link matching category (approximate)
+    const links = Array.from(document.querySelectorAll('.nav-links a'));
+    const activeLink = links.find(a => a.innerText.includes(category) || (category === 'all' && a.innerText.includes('Home')));
+    if (activeLink) activeLink.classList.add('active');
 
-    // 3. Render the filtered news
-    renderNews(category);
-    window.scrollTo(0,0);
+    // Logic
+    if (category === 'all') {
+        const feedCol = document.querySelector('.news-feed-column');
+        // Restore Home HTML Structure if needed (simplified: just reload clean structure or re-render)
+        // Since we modified innerHTML of feed-column in category view, we need to revert.
+        // Easiest is to reload page or rebuild DOM. For SPA seamlessly:
+        location.reload(); // Simplest way to restore complex layout grid without managing state of deleted DOM elements.
+        return;
+    }
+
+    // Hide Home Specifics
+    document.getElementById('hero-section').style.display = 'none';
+    document.getElementById('video-section').style.display = 'none';
+
+    // Filter Data
+    const filtered = allNewsData.filter(n => n.category === category || (category === 'Videos' && n.hasVideo));
+
+    const feedCol = document.querySelector('.news-feed-column');
+    feedCol.innerHTML = `
+        <div class="category-block">
+            <div class="section-header">
+                <h2>${category + ' News'}</h2>
+            </div>
+             <div class="category-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+                ${filtered.length ? filtered.map(item => `
+                    <div class="article-card" onclick='openArticlePage(${safeJSON(item)})'>
+                        <div class="card-img">
+                            <img src="${item.img}" loading="lazy">
+                            <span class="card-tag">${item.category || 'News'}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="card-meta">📅 ${item.date || 'Recent'}</div>
+                            <h3 class="card-title">${item.title}</h3>
+                            <div class="card-excerpt">${item.summary || item.desc?.substring(0, 80) + '...'}</div>
+                        </div>
+                    </div>
+                `).join('') : '<p>No news found in this category.</p>'}
+             </div>
+        </div>
+    `;
+    window.scrollTo(0, 0);
 };
 
-// --- RESPONSIVE MULTI-PHOTO DISTRIBUTION ---
+
+// --- COMPONENT RENDERERS ---
+
+function renderHeroGrid(items) {
+    const container = document.getElementById('hero-grid');
+    if (!container || items.length === 0) return;
+
+    let html = '';
+    // Main Story (Big Left)
+    if (items[0]) {
+        html += `
+        <div class="hero-item hero-main-cell main-story" onclick='openArticlePage(${safeJSON(items[0])})'>
+            <img src="${items[0].img}">
+            <span class="hero-tag">TOP STORY</span>
+            <div class="overlay">
+                <h2>${items[0].title}</h2>
+                <p style="font-size:0.9rem; opacity:0.9; margin-top:5px;">${items[0].summary || items[0].desc?.substring(0, 100)}...</p>
+            </div>
+        </div>`;
+    }
+    // Sub Stories (Right Stack)
+    if (items[1]) {
+        html += `
+        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${safeJSON(items[1])})'>
+            <img src="${items[1].img}">
+            <div class="overlay"><h2>${items[1].title}</h2></div>
+        </div>`;
+    }
+    if (items[2]) {
+        html += `
+        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${safeJSON(items[2])})'>
+            <img src="${items[2].img}">
+            <div class="overlay"><h2>${items[2].title}</h2></div>
+        </div>`;
+    }
+    container.innerHTML = html;
+}
+
+function renderGridSection(id, items) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.innerHTML = items.map(item => `
+            <div class="article-card" onclick='openArticlePage(${safeJSON(item)})'>
+                <div class="card-img">
+                    <img src="${item.img}" loading="lazy">
+                     <span class="card-tag">${item.category || 'News'}</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-meta">📅 ${item.date || 'Just Now'}</div>
+                    <h3 class="card-title">${item.title}</h3>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderListSection(id, items) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.innerHTML = items.map(item => `
+            <div class="list-item" onclick='openArticlePage(${safeJSON(item)})'>
+                <img src="${item.img}" loading="lazy">
+                <div class="list-content">
+                    <h3>${item.title}</h3>
+                    <span>${item.date || 'Recent'} • ✍️ ${item.author || 'Admin'}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+function renderScrollSection(id, items) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.innerHTML = items.map(item => `
+            <div class="scroll-card article-card" onclick='openArticlePage(${safeJSON(item)})'>
+                <div class="card-img"><img src="${item.img}" loading="lazy"></div>
+                <div class="card-body">
+                    <h3 class="card-title" style="font-size:1rem;">${item.title}</h3>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+
+
+function renderTicker() {
+    const el = document.getElementById('breaking-ticker');
+    if (el) {
+        const breaking = allNewsData.filter(n => n.type === 'breaking' || n.category === 'Updates');
+        if (breaking.length > 0) {
+            el.innerHTML = breaking.map(n => `🔴 ${n.title}`).join(" &nbsp;&nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;&nbsp; ");
+        } else {
+            el.innerHTML = "Welcome to Vadi E Kashmir — Your Source for Truth.";
+        }
+    }
+}
+
+function renderSidebarWidgets() {
+    // Trending Tab
+    const trending = allNewsData.filter(n => n.isTrending).slice(0, 5);
+    const container = document.getElementById('sidebar-tab-content');
+    if (container) {
+        container.innerHTML = trending.map((item, i) => `
+            <div class="mini-list-item" onclick='openArticlePage(${safeJSON(item)})'>
+                <div class="mini-count">${i + 1}</div>
+                <div class="mini-title">${item.title}</div>
+            </div>
+        `).join('');
+    }
+
+    // Daily Awareness
+    const quotes = [
+        "The best way to verify a news is to wait.",
+        "Truth is rare, rumor is common.",
+        "Think before you share.",
+        "Your voice matters.",
+        "Peace is the ultimate goal."
+    ];
+    document.getElementById('daily-quote').innerText = `"${quotes[Math.floor(Math.random() * quotes.length)]}"`;
+}
+
+// --- ADS & HELPERS ---
+
+function renderAds(adData) {
+    const headerAd = document.getElementById('header-ad');
+    const sidebarAd = document.getElementById('sidebar-ad-slot');
+
+    const adHTML = `<a href="${adData.link || '#'}" target="_blank"><img src="${adData.img}" style="width:100%; height:100%; object-fit:cover;"></a>`;
+
+    if (headerAd && adData.img) headerAd.innerHTML = adHTML;
+    if (sidebarAd && adData.img) sidebarAd.innerHTML = adHTML;
+}
+
+function safeJSON(item) {
+    if (!item) return "{}";
+    return JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+}
+
+
+// --- ARTICLE VIEW (Overlay) ---
+
 window.openArticlePage = (item) => {
-    updateMetaForCrawler(item);
-    document.getElementById('main-content-area').style.display = 'none';
-    const view = document.getElementById('article-page-view');
-    view.style.display = 'block';
-    applyTheme();
-    window.scrollTo(0,0);
-    
-    const lines = item.desc.split('\n');
+    // Update Meta
+    document.title = item.title + " | Vadi E Kashmir";
+
+    const overlay = document.getElementById('article-page-view');
+    overlay.style.display = 'block';
+
+    // Generate Body with Smart Image Injection
+    const lines = (item.desc || item.summary || "").split('\n');
     let formattedBody = "";
-    let galleryIndex = 0;
-    const galleryItems = item.gallery || [];
+    let gallery = item.gallery || [];
+    let gIndex = 0;
 
-    const gap = Math.max(5, Math.floor(lines.length / (galleryItems.length + 1)));
+    // Logic: Inject an image every 3 paragraphs
+    lines.forEach((line, idx) => {
+        if (line.trim().length > 0) formattedBody += `<p>${line}</p>`;
 
-    lines.forEach((line, index) => {
-        formattedBody += `<p>${line}</p>`; 
-        
-        if (galleryIndex < galleryItems.length && (index + 1) % gap === 0) {
-            formattedBody += `
-                <div class="article-body-image">
-                    <img src="${galleryItems[galleryIndex]}" alt="News Gallery">
-                </div>`;
-            galleryIndex++; 
+        if (gIndex < gallery.length && (idx + 1) % 3 === 0) {
+            formattedBody += `<div class="article-body-image"><img src="${gallery[gIndex]}"></div>`;
+            gIndex++;
         }
     });
 
-    if (galleryIndex < galleryItems.length) {
+    // Append remaining images at bottom
+    if (gIndex < gallery.length) {
         formattedBody += `<div class="article-bottom-grid">`;
-        while (galleryIndex < galleryItems.length) {
-            formattedBody += `
-                <div class="grid-image-item">
-                    <img src="${galleryItems[galleryIndex]}" alt="News Gallery">
-                </div>`;
-            galleryIndex++;
+        while (gIndex < gallery.length) {
+            formattedBody += `<div class="grid-image-item"><img src="${gallery[gIndex]}"></div>`;
+            gIndex++;
         }
         formattedBody += `</div>`;
     }
 
-    document.getElementById('article-container').innerHTML = `
-        <div style="display:flex; justify-content:space-between; margin-bottom:20px; padding: 10px;">
-            <button onclick="closeArticle()" class="back-btn">← BACK</button>
-            <button style="background:#25D366; color:white; border:none; padding:10px 20px; border-radius:30px; font-weight:bold; cursor:pointer;" 
-                onclick="shareNewsManual('${item.title.replace(/'/g, "\\'")}', '${item.author || "Admin"}', '${item.fbId}', '${item.img}')">
-                <i class="fab fa-whatsapp"></i> SHARE</button>
+    const wrapper = document.getElementById('article-content-wrapper');
+    wrapper.innerHTML = `
+        <img src="${item.img}" class="art-head-img">
+        <h1 class="art-title">${item.title}</h1>
+        <div class="art-meta">
+            <span>✍️ ${item.author || "Admin"}</span>
+            <span style="margin:0 10px">•</span>
+            <span>📅 ${item.date || "Today"}</span>
+            <span style="margin:0 10px">•</span>
+            <span>📂 ${item.category}</span>
         </div>
-        <div class="article-inner">
-            <img src="${item.img}" class="main-article-img" style="width:100%; border-radius:12px; margin-bottom:20px; max-height:350px; object-fit:cover;">
-            <h1 class="article-title">${item.title}</h1>
-            <div class="article-meta">
-                <span class="meta-item">✍️ ${item.author || "Admin"}</span>
-                <span class="meta-divider">|</span>
-                <span class="meta-item">📅 ${item.date || "Recent"}</span>
-            </div>
-            <div class="article-body">${formattedBody}</div>
-        </div>`;
+        <div class="art-body">${formattedBody}</div>
+        <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
+            <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.img}')" 
+                style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px;">
+                <i class="fab fa-whatsapp"></i> Share this News
+            </button>
+        </div>
+    `;
+
+    document.body.style.overflow = 'hidden'; // Stop background scrolling
 };
 
 window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
-    document.getElementById('main-content-area').style.display = 'block';
+    document.body.style.overflow = 'auto';
+    document.title = "Vadi E Kashmir | Your Trusted News Source";
 };
 
-// --- IMAGE SHARE + FINAL TEXT FORMAT ---
-window.shareNewsManual = async (title, author, id, imageUrl) => {
-    const publicLink = `https://vediekashmir.netlify.app`;
-    const shareText = `*${title.toUpperCase()}*\n\n✍️ : ${author}\n\nRead more at:\n${publicLink}\n\n_Vadi-E-Kashmir_`;
-
+window.shareArticle = async (title, url) => {
+    const shareText = `*${title.toUpperCase()}*\n\nRead more at:\nhttps://vediekashmir.netlify.app\n\n_Vadi-E-Kashmir_`;
     try {
         await navigator.clipboard.writeText(shareText);
-        if (navigator.share && imageUrl) {
-            const response = await fetch(imageUrl);
-            const blob = await response.blob();
-            const file = new File([blob], 'vadi-news.jpg', { type: blob.type });
-
-            await navigator.share({
-                files: [file],
-                title: title
-            });
-        } else {
-            alert("Details copied! Now paste in WhatsApp.");
-            window.open(`https://wa.me/`, '_blank');
-        }
-    } catch (err) {
-        console.error("Share failed", err);
-        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        alert("Link copied! Open WhatsApp to paste.");
+        window.open('https://wa.me/');
+    } catch (e) {
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`);
     }
 };
 
-function updateMetaForCrawler(item) {
-    if (item) {
-        const titleMeta = document.getElementById('meta-title');
-        const imageMeta = document.getElementById('meta-image');
-        if(titleMeta) titleMeta.setAttribute('content', item.title);
-        if(imageMeta) imageMeta.setAttribute('content', item.img);
+
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+    loadAllData();
+    applyTheme();
+
+    // Search Listener
+    const searchInput = document.getElementById('navSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                const term = e.target.value.toLowerCase();
+                const matched = allNewsData.filter(n => n.title.toLowerCase().includes(term));
+                // Hijack Main Column for Search Results
+                const feedCol = document.querySelector('.news-feed-column');
+                document.getElementById('hero-section').style.display = 'none';
+                feedCol.innerHTML = `
+                    <div class="category-block"><div class="section-header"><h2>Search: "${term}"</h2></div>
+                    <div class="list-layout">
+                        ${matched.map(item => `
+                            <div class="list-item" onclick='openArticlePage(${safeJSON(item)})'>
+                                <img src="${item.img}">
+                                <div class="list-content"><h3>${item.title}</h3></div>
+                            </div>
+                        `).join('')}
+                    </div></div>`;
+            }
+        });
     }
-}
-
-function generateDailyMessage() {
-    const el = document.getElementById('auto-message');
-    const msgs = [ "🚗 Traffic Safety: Speed thrills but kills. Drive slowly and reach home safely.",
-        "💧 Save Water: A drop of water is worth more than a sack of gold to a thirsty man.",
-        "🌳 Environment: He that plants a tree loves others beside himself.",
-        "🚭 Health: Your body hears everything your mind says. Stay positive, stay healthy.",
-        "⚡ Energy: Energy saved is energy generated. Switch off lights when not in use.",
-        "🚮 Cleanliness: Keep your city clean. Use dustbins and avoid plastic.",
-        "🏥 Health: An apple a day keeps the doctor away. Eat fresh, live long.",
-        "🛑 Traffic: Don't use mobile phones while driving. Your life is precious.",
-        "🤝 Community: United we stand, divided we fall. Help your neighbors.",
-        "🩸 Donation: Blood donation is the real act of humanity. Save a life today.",
-        "🌊 Water: Don't let the water run while you brush your teeth.",
-        "🔥 Safety: Check your gas cylinder regulator before going to bed.",
-        "🧠 Mental Health: It's okay not to be okay. Talk to someone if you feel low.",
-        "🚴 Fitness: Take a walk or ride a bike. Your heart will thank you.",
-        "🎓 Education: Education is the most powerful weapon which you can use to change the world.",
-        "🚦 Rules: Red means stop, Green means go. Respect traffic lights.",
-        "🔋 Future: Recycle e-waste. Don't throw batteries in the trash.",
-        "😷 Hygiene: Wash your hands frequently to stop the spread of germs.",
-        "👵 Respect: Respect your elders. They guided you when you couldn't walk.",
-        "🐶 Animals: Be kind to street animals. They feel pain too."];
-    const day = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-    if(el) el.innerHTML = `"${msgs[day % msgs.length]}"`;
-}
-
-document.addEventListener("DOMContentLoaded", () => { loadAllData(); generateDailyMessage(); applyTheme(); });
+});

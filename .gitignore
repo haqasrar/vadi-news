@@ -1,0 +1,19 @@
+# Systems
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/node_modules
+/vendor
+
+# Environment
+.env
+.env.local
+
+# Local Uploads (Since we use DB storage for Vercel)
+/uploads/*
+!/uploads/.gitkeep
+
+# Logs
+/logs
+*.log

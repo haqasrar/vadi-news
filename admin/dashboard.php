@@ -1,3 +1,10 @@
+<?php
+session_start();
+if(!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true){
+    header("Location: index.php");
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,14 +17,6 @@
         * { box-sizing: border-box; outline: none; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: #f4f6f9; display: flex; height: 100vh; overflow: hidden; }
         
-        /* LOGIN */
-        #login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111827; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .login-box { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; width: 100%; max-width: 350px; }
-        .login-logo { width: 80px; height: 80px; object-fit: cover; border-radius: 50%; border: 3px solid #b91c1c; margin: 0 auto 15px auto; display: block; }
-        .channel-name { color: #b91c1c; font-size: 1.5rem; font-weight: 900; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px; }
-        .login-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; background: #f9f9f9; font-size: 16px; }
-        .login-btn { width: 100%; padding: 12px; background: #b91c1c; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 15px; font-size: 16px; }
-
         /* LAYOUT */
         .sidebar { width: 250px; background: #111827; color: white; display: flex; flex-direction: column; flex-shrink: 0; transition: 0.3s; z-index: 100; }
         .brand { padding: 20px; text-align: center; border-bottom: 1px solid #374151; }
@@ -25,10 +24,10 @@
         .nav-links { list-style: none; padding: 0; margin-top: 20px; flex-grow: 1; overflow-y: auto; }
         .nav-links li { padding: 15px 20px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; color: #9ca3af; white-space: nowrap; }
         .nav-links li:hover, .nav-links li.active { background: #b91c1c; color: white; }
-        .logout-btn { padding: 20px; text-align: center; cursor: pointer; background: #1f2937; border-top: 1px solid #374151; }
+        .logout-btn { padding: 20px; text-align: center; cursor: pointer; background: #1f2937; border-top: 1px solid #374151; color: #fff; text-decoration: none; display: block; }
 
         /* CONTENT */
-        .main { flex-grow: 1; padding: 30px; overflow-y: auto; display: none; width: 100%; }
+        .main { flex-grow: 1; padding: 30px; overflow-y: auto; width: 100%; }
         .page-section { display: none; }
         .page-section.active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -64,25 +63,13 @@
 </head>
 <body>
 
-    <div id="login-overlay">
-        <div class="login-box">
-            <img src="images/Logo.png" class="login-logo" alt="Logo">
-            <h1 class="channel-name">VADI E KASHMIR</h1>
-            <div style="color:#666; margin-bottom:20px;">Admin Access</div>
-            <input type="text" id="adminID" class="login-input" placeholder="Admin ID">
-            <input type="password" id="adminPass" class="login-input" placeholder="Password">
-            <button onclick="attemptLogin()" class="login-btn">Secure Login</button>
-            <p id="loginError" style="color:red; display:none; margin-top:10px;">Invalid Credentials!</p>
-        </div>
-    </div>
-
     <div class="sidebar">
         <div class="brand">
             <div style="display:flex; align-items:center; gap:10px;">
-                <img src="images/Logo.png" class="brand-logo" alt="Logo">
+                <img src="../images/Logo.png" class="brand-logo" alt="Logo">
                 <div style="font-weight:bold; color:#b91c1c;">VADI <span>ADMIN</span></div>
             </div>
-            <div class="logout-btn" onclick="location.reload()">Logout</div>
+            <a href="logout.php" class="logout-btn">Logout</a>
         </div>
         <ul class="nav-links">
             <li onclick="showPage('news-page', this)" class="active"><i class="fas fa-pen"></i> Post</li>
@@ -94,6 +81,7 @@
     </div>
 
     <div class="main" id="dashboardMain">
+        <!-- 1. POST NEWS -->
         <div id="news-page" class="page-section active">
             <div class="card">
                 <h2>📝 Post News</h2>
@@ -101,29 +89,37 @@
                     <div class="form-grid">
                         <div>
                             <label>Layout</label>
-                            <select id="newsType"><option value="standard">Standard (Grid)</option><option value="hero">Hero (Top)</option></select>
+                            <select id="newsType" name="type"><option value="standard">Standard (Grid)</option><option value="hero">Hero (Top)</option></select>
                         </div>
                         <div>
                             <label>Category</label>
-                            <select id="newsCategory">
+                            <select id="newsCategory" name="category">
                                 <option value="J & K">J & K</option>
                                 <option value="Nation">Nation</option>
                                 <option value="Updates">Updates</option>
                                 <option value="Business">Business</option>
+                                <option value="Sports">Sports</option>
+                                <option value="Technology">Technology</option>
+                                <option value="Education">Education</option>
                             </select>
                         </div>
                     </div>
-                    <label>Headline</label><input type="text" id="title" required>
-                    <label>Writer</label><input type="text" id="author" placeholder="Admin">
-                    <label>Description (You can paste links)</label><textarea id="desc" style="height:100px"></textarea>
+                    <label>Headline</label><input type="text" id="title" name="title" required>
+                    <label>Writer</label><input type="text" id="author" name="author" placeholder="Admin">
+                    <label>Description (You can paste links)</label><textarea id="desc" name="desc" style="height:100px"></textarea>
+                    
+                    <!-- We will use Base64 for images to keep it simple or handle multipart -->
                     <label>Main Image (Automatically Compresses)</label><input type="file" id="mainImg">
+                    
                     <label>Gallery (Multiple)</label><input type="file" id="galleryImg" multiple>
-                    <label>Video URL</label><input type="text" id="videoLink">
+                    <label>Video URL</label><input type="text" id="videoLink" name="video">
+                    
                     <button type="submit" class="btn" id="publishBtn">Publish News</button>
                 </form>
             </div>
         </div>
 
+        <!-- 2. MANAGE NEWS -->
         <div id="manage-news-page" class="page-section">
             <div class="card">
                 <h2>🗑️ Delete News</h2>
@@ -133,6 +129,7 @@
             </div>
         </div>
         
+        <!-- 3. TICKER -->
         <div id="ticker-page" class="page-section">
             <div class="card">
                 <h2>⚡ Ticker</h2>
@@ -144,6 +141,7 @@
             </div>
         </div>
         
+        <!-- 4. TRENDING -->
         <div id="trending-page" class="page-section">
             <div class="card">
                 <h2>📈 Trending</h2>
@@ -153,6 +151,7 @@
             </div>
         </div>
         
+        <!-- 5. ADS -->
         <div id="ads-page" class="page-section">
             <div class="card">
                 <h2>📢 Manage Ads</h2>
@@ -163,42 +162,12 @@
                     <label>Link</label><input type="text" id="adLink">
                     <button type="submit" class="btn">Set Ad</button>
                 </form>
-                <hr style="margin:20px 0;">
-                <h3>Google Ad</h3>
-                <form id="googleAdForm">
-                    <label>Script</label><textarea id="googleCode" style="height:80px"></textarea>
-                    <button type="submit" class="btn">Set Code</button>
-                </form>
             </div>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-        // YOUR FIREBASE CONFIG
-        const firebaseConfig = {
-            apiKey: "AIzaSyAj1lPZymdb6jSPrf8ZSfBIIlvc-7JqLho",
-            authDomain: "vadi-e-kashmir.firebaseapp.com",
-            projectId: "vadi-e-kashmir",
-            storageBucket: "vadi-e-kashmir.firebasestorage.app",
-            messagingSenderId: "330323093016",
-            appId: "1:330323093016:web:a4204fac189bf119b5c56d",
-            measurementId: "G-6MPEY5VH7L"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        // --- AUTH & NAV ---
-        window.attemptLogin = function() {
-            if(document.getElementById('adminID').value === "vadiadmin" && document.getElementById('adminPass').value === "developer123") {
-                document.getElementById('login-overlay').style.display = 'none';
-                document.getElementById('dashboardMain').style.display = 'block';
-            } else { document.getElementById('loginError').style.display = 'block'; }
-        }
-        
+    <script>
+        // --- NAVIGATION ---
         window.showPage = function(pid, el) {
             document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
             document.getElementById(pid).classList.add('active');
@@ -209,8 +178,7 @@
             if(pid==='manage-news-page') loadManage();
         }
 
-        // --- ✅ NEW: SMART IMAGE COMPRESSION ---
-        // This function shrinks large images to under 100KB automatically
+        // --- UTILS: Smart Image Compression (Reuse from previous admin.html) ---
         const resizeImage = (file) => new Promise((resolve) => {
             if(!file) resolve(null);
             const reader = new FileReader();
@@ -230,16 +198,17 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    // Compress quality to 70%
-                    resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress quality 70%
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         });
 
-        // --- 1. POST NEWS ---
-        document.getElementById('newsForm').addEventListener('submit', async(e)=>{
+        // --- API CALLS ---
+
+        // 1. POST NEWS
+        document.getElementById('newsForm').addEventListener('submit', async(e) => {
             e.preventDefault();
             const btn = document.getElementById('publishBtn');
             btn.disabled = true; 
@@ -248,118 +217,127 @@
             const f = document.getElementById('mainImg').files[0];
             const gf = document.getElementById('galleryImg').files;
             
-            // Use New Resize Function
-            let img = "https://via.placeholder.com/400";
+            let img = "";
             if(f) {
-                img = await resizeImage(f); // This fixes the 1MB limit error
+                img = await resizeImage(f); 
             }
             
             let gal = []; 
             for(let g of gf) {
                 gal.push(await resizeImage(g));
             }
-            
-            const p = { 
-                id: Date.now(), 
-                type: document.getElementById('newsType').value, 
+
+            // Prepare FormData (mimicking JSON structure but sent as POST)
+            // Actually, sending JSON body is easier with Base64 strings
+            const data = {
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                desc: document.getElementById('desc').value,
+                type: document.getElementById('newsType').value,
                 category: document.getElementById('newsCategory').value,
-                title: document.getElementById('title').value, 
-                author: document.getElementById('author').value, 
-                desc: document.getElementById('desc').value, 
-                img: img, 
-                gallery: gal, 
-                video: document.getElementById('videoLink').value, 
-                date: new Date().toLocaleString(), 
-                isTrending: false 
+                video: document.getElementById('videoLink').value,
+                main_image: img,
+                gallery: gal
             };
-            
+
             try {
-                await addDoc(collection(db, "news"), p);
-                alert("✅ Published Successfully!"); 
-                e.target.reset();
+                const response = await fetch('api/post_news.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if(result.success) {
+                    alert("✅ Published Successfully!"); 
+                    e.target.reset();
+                } else {
+                    alert("Error: " + result.message);
+                }
             } catch(err) { 
                 console.error(err); 
-                alert("Error publishing: " + err.message); 
+                alert("Network Error!"); 
             } finally {
                 btn.disabled = false;
                 btn.innerText = "Publish News";
             }
         });
 
-        // --- 2. TICKER ---
+        // 2. TICKER
         document.getElementById('tickerForm').addEventListener('submit', async(e)=>{
             e.preventDefault();
-            const p = { 
-                type: 'breaking', 
-                title: document.getElementById('tickerTitle').value, 
-                link: document.getElementById('tickerLink').value, 
-                date: new Date().toLocaleString(),
-                id: Date.now()
+            const data = {
+                title: document.getElementById('tickerTitle').value,
+                link: document.getElementById('tickerLink').value
             };
+            
             try {
-                await addDoc(collection(db, "news"), p);
+                const response = await fetch('api/post_ticker.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
                 alert("Ticker Updated!"); 
                 e.target.reset();
             } catch(err) { console.error(err); }
         });
 
-        // --- 3. TRENDING ---
-        async function loadTrend() {
-            const b = document.getElementById('trendingListBody'); b.innerHTML = "Loading...";
-            const q = query(collection(db, "news"), orderBy("id", "desc"));
-            const snapshot = await getDocs(q);
-            b.innerHTML = "";
-            
-            snapshot.forEach(docSnap => {
-                const i = docSnap.data();
-                if(i.type !== 'breaking') {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `<td>${i.title.substring(0,20)}...</td><td>${i.date.split(',')[0]}</td><td><input type="checkbox" ${i.isTrending?'checked':''} onchange="toggleTrend('${docSnap.id}', this.checked)"></td>`;
-                    b.appendChild(tr);
-                }
-            });
-        }
-        window.toggleTrend = async function(docId, status) {
-            await updateDoc(doc(db, "news", docId), { isTrending: status });
+        // 3. LOAD DATA (Trending/Manage)
+        async function fetchNews() {
+            const res = await fetch('api/get_news.php');
+            return await res.json();
         }
 
-        // --- 4. MANAGE / DELETE ---
         async function loadManage() {
-            const b = document.getElementById('manageNewsBody'); b.innerHTML = "Loading...";
-            const q = query(collection(db, "news"), orderBy("id", "desc"));
-            const snapshot = await getDocs(q);
-            b.innerHTML = "";
-            
-            snapshot.forEach(docSnap => {
-                const i = docSnap.data();
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${i.title.substring(0,20)}...</td><td>${i.category||i.type}</td><td><button class="delete-btn" onclick="deleteNews('${docSnap.id}')">Delete</button></td>`;
-                b.appendChild(tr);
-            });
-        }
-        window.deleteNews = async function(docId) { 
-            if(confirm("Delete this news?")) { 
-                await deleteDoc(doc(db, "news", docId)); 
-                loadManage(); 
-            } 
+            const b = document.getElementById('manageNewsBody'); 
+            b.innerHTML = "Loading...";
+            try {
+                const news = await fetchNews();
+                b.innerHTML = "";
+                news.forEach(i => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${i.title.substring(0,30)}...</td><td>${i.category||i.type}</td><td><button class="delete-btn" onclick="deleteNews(${i.id})">Delete</button></td>`;
+                    b.appendChild(tr);
+                });
+            } catch(e) { b.innerHTML = "Error loading news."; }
         }
 
-        // --- 5. ADS (Also using compression) ---
-        document.getElementById('manualAdForm').addEventListener('submit', async(e)=>{
-            e.preventDefault();
-            const f = document.getElementById('adImg').files[0];
-            if(f) { 
-                const i = await resizeImage(f); 
-                const data = { type:'manual', img:i, bio:document.getElementById('adBio').value, link:document.getElementById('adLink').value };
-                await setDoc(doc(db, "settings", "ads"), data);
-                alert("Ad Set!"); 
+        async function deleteNews(id) {
+            if(confirm("Delete this news?")) {
+                await fetch('api/delete_news.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({id: id})
+                });
+                loadManage();
             }
-        });
-        document.getElementById('googleAdForm').addEventListener('submit', async(e)=>{ 
-            e.preventDefault(); 
-            await setDoc(doc(db, "settings", "ads"), {type:'google', code:document.getElementById('googleCode').value}); 
-            alert("Google Ad Set!"); 
-        });
+        }
+
+        async function loadTrend() {
+            const b = document.getElementById('trendingListBody'); 
+            b.innerHTML = "Loading...";
+            try {
+                const news = await fetchNews();
+                b.innerHTML = "";
+                news.forEach(i => {
+                    if(i.type !== 'breaking') { // Filter out ticker items if they are mixed, but our schema separates them usually. 
+                                                // Actually get_news.php will likely return all news.
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `<td>${i.title.substring(0,30)}...</td><td>${i.created_at}</td><td><input type="checkbox" ${i.is_trending == 1 ?'checked':''} onchange="toggleTrend(${i.id}, this.checked)"></td>`;
+                        b.appendChild(tr);
+                    }
+                });
+            } catch(e) { b.innerHTML = "Error."; }
+        }
+
+        async function toggleTrend(id, status) {
+            await fetch('api/toggle_trending.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({id: id, status: status})
+            });
+        }
+        
     </script>
 </body>
 </html>
