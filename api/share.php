@@ -18,10 +18,40 @@ if($id) {
     }
 }
 
+// 1. IMAGE PROXY MODE
+// If ?img=true is set, serve the raw image data for valid OG tags
+if(isset($_GET['img']) && $news && !empty($news['main_image'])) {
+    $b64 = $news['main_image'];
+    
+    // Detect basic type (jpeg/png/gif)
+    $mime = "image/jpeg"; // Default
+    if(strpos($b64, 'image/png') !== false) $mime = "image/png";
+    if(strpos($b64, 'image/gif') !== false) $mime = "image/gif";
+    if(strpos($b64, 'image/webp') !== false) $mime = "image/webp";
+
+    // Clean base64 string
+    // Remove "data:image/jpeg;base64," header
+    $b64Clean = preg_replace('#^data:image/[^;]+;base64,#', '', $b64);
+    $data = base64_decode($b64Clean);
+
+    header("Content-Type: $mime");
+    header("Content-Length: " . strlen($data));
+    echo $data;
+    exit;
+}
+
 // Defaults
 $title = $news ? $news['title'] : "Vadi E Kashmir | Latest News";
 $desc = $news ? substr($news['description'], 0, 150) . "..." : "Stay informed with the latest news from the valley.";
-$img = $news && !empty($news['main_image']) ? $news['main_image'] : "https://vediekashmir.vercel.app/images/Logo.png";
+
+// Use the Proxy URL for og:image so scrapers get a real file
+// Use strict main_image check
+if ($news && !empty($news['main_image'])) {
+    $img = "https://vediekashmir.vercel.app/api/share.php?id=$id&img=true";
+} else {
+    $img = "https://vediekashmir.vercel.app/images/Logo.png";
+}
+
 $url = "https://vediekashmir.vercel.app/news/$id";
 
 ?>
@@ -36,6 +66,8 @@ $url = "https://vediekashmir.vercel.app/news/$id";
     <meta property="og:title" content="<?php echo htmlspecialchars($title); ?>">
     <meta property="og:description" content="<?php echo htmlspecialchars($desc); ?>">
     <meta property="og:image" content="<?php echo $img; ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="<?php echo $url; ?>">
     <meta property="og:site_name" content="Vadi E Kashmir">
     
