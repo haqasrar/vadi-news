@@ -4,28 +4,30 @@ header("Content-Type: application/json");
 include __DIR__ . '/admin/config.php';
 
 try {
-    // Only fetch lightweight metadata — NO base64 images, NO full description
+    // Only fetch lightweight metadata — NO full base64 main_image blob
     // This prevents FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE on Vercel
-    $sql = "SELECT id, title, author, category, type, summary, video_url, created_at, is_trending
+    // Columns in schema: id, title, author, category, type, video_url, is_trending, created_at, description
+    // We grab a short excerpt of description as 'summary' (first 150 chars)
+    $sql = "SELECT id, title, author, category, type, video_url, is_trending, created_at,
+                   SUBSTRING(description, 1, 150) AS summary
             FROM news ORDER BY id DESC LIMIT 50";
     $stmt = $conn->query($sql);
     $news = [];
 
     if ($stmt) {
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            // Ensure type is consistent
             if (!isset($row['type']) || !$row['type']) $row['type'] = 'standard';
 
-            // Provide a thumbnail URL via separate endpoint instead of embedding base64
-            $row['img'] = '/api/get_thumb.php?id=' . $row['id'];
-            $row['date'] = $row['created_at'];
+            // Thumbnail served via separate endpoint — avoid embedding base64 in list
+            $row['img']        = '/api/get_thumb.php?id=' . $row['id'];
+            $row['date']       = $row['created_at'];
             $row['isTrending'] = (bool)$row['is_trending'];
 
             $news[] = $row;
         }
     }
 
-    // Fetch Ticker (Breaking News) - these are small text-only rows
+    // Fetch Ticker (Breaking News) — text-only, tiny payload
     $tStmt = $conn->query("SELECT id, title, created_at FROM ticker ORDER BY id DESC LIMIT 5");
     if ($tStmt) {
         while ($tRow = $tStmt->fetch(PDO::FETCH_ASSOC)) {

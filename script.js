@@ -40,7 +40,14 @@ async function loadAllData() {
         // Add cache busting to prevent stale data on Vercel
         const response = await fetch(API_URL + '?_=' + new Date().getTime());
         const data = await response.json();
+
+        // Guard: API may return an error object instead of an array
+        if (!Array.isArray(data)) {
+            throw new Error(data.error || 'API did not return an array. Check server logs.');
+        }
+
         allNewsData = data;
+
         // Load Ads
         try {
             const adRes = await fetch('api/get_ads.php');
@@ -48,11 +55,10 @@ async function loadAllData() {
             if (adData) renderAds(adData);
         } catch (e) { console.log("Ad load error", e); }
 
-        // Initial Render
-        // Fix Date Issue (Backend sends created_at, Frontend uses date)
+        // date field already mapped in PHP, but keep fallback
         allNewsData = allNewsData.map(item => ({
             ...item,
-            date: item.created_at || item.date // Fallback
+            date: item.date || item.created_at || 'Recent'
         }));
 
         renderHomeLayout();
@@ -64,6 +70,7 @@ async function loadAllData() {
         document.getElementById('hero-grid').innerHTML = `<p style="color:red; text-align:center; padding:20px;">Error loading news. Please refresh.<br><small>${e.message}</small></p>`;
     }
 }
+
 
 // --- RENDERING CONTROLLERS ---
 
