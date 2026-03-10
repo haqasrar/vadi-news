@@ -1,41 +1,36 @@
 <?php
-// admin/api/get_news.php
+// api/get_news.php
 header("Content-Type: application/json");
 include __DIR__ . '/admin/config.php';
 
-// Fetch News
 try {
-    $sql = "SELECT * FROM news ORDER BY id DESC";
+    // Only fetch lightweight metadata — NO base64 images, NO full description
+    // This prevents FUNCTION_RESPONSE_PAYLOAD_TOO_LARGE on Vercel
+    $sql = "SELECT id, title, author, category, type, summary, video_url, created_at, is_trending
+            FROM news ORDER BY id DESC LIMIT 50";
     $stmt = $conn->query($sql);
     $news = [];
 
     if ($stmt) {
-        while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $nid = $row['id'];
-            
-            // Gallery
-            $gStmt = $conn->prepare("SELECT image_url FROM news_gallery WHERE news_id = ?");
-            $gStmt->execute([$nid]);
-            $gallery = $gStmt->fetchAll(PDO::FETCH_COLUMN);
-            
-            $row['gallery'] = $gallery;
-
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             // Ensure type is consistent
-            if(!isset($row['type']) || !$row['type']) $row['type'] = 'standard';
+            if (!isset($row['type']) || !$row['type']) $row['type'] = 'standard';
 
-            // Map fields for frontend compatibility
-            $row['img'] = $row['main_image']; 
-            $row['desc'] = $row['description'];
+            // Provide a thumbnail URL via separate endpoint instead of embedding base64
+            $row['img'] = '/api/get_thumb.php?id=' . $row['id'];
+            $row['date'] = $row['created_at'];
+            $row['isTrending'] = (bool)$row['is_trending'];
 
             $news[] = $row;
         }
     }
 
-    // Fetch Ticker (Breaking News)
-    $tStmt = $conn->query("SELECT * FROM ticker ORDER BY id DESC LIMIT 5");
+    // Fetch Ticker (Breaking News) - these are small text-only rows
+    $tStmt = $conn->query("SELECT id, title, created_at FROM ticker ORDER BY id DESC LIMIT 5");
     if ($tStmt) {
-        while($tRow = $tStmt->fetch(PDO::FETCH_ASSOC)) {
-            $tRow['type'] = 'breaking'; // Force type for frontend filter
+        while ($tRow = $tStmt->fetch(PDO::FETCH_ASSOC)) {
+            $tRow['type'] = 'breaking';
+            $tRow['date'] = $tRow['created_at'];
             $news[] = $tRow;
         }
     }

@@ -96,7 +96,7 @@ function renderHomeLayout() {
     const visualNews = allNewsData.find(n => n.img && n.category !== 'Videos' && !heroes.includes(n));
     if (visualNews) {
         document.getElementById('big-picture-slot').innerHTML = `
-            <div class="article-card" onclick='openArticlePage(${safeJSON(visualNews)})' style="position:relative; height:300px; border:none; cursor:pointer;">
+            <div class="article-card" onclick='openArticlePage(${articleId(visualNews)})' style="position:relative; height:300px; border:none; cursor:pointer;">
                 <img src="${visualNews.img}" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.7);">
                 <div style="position:absolute; bottom:20px; left:20px; color:white; text-shadow:0 2px 4px rgba(0,0,0,0.8);">
                     <span style="background:var(--primary); padding:4px 8px; font-weight:700; font-size:0.7rem; margin-bottom:10px; display:inline-block;">IN PICTURES</span>
@@ -143,7 +143,7 @@ window.filterByCategory = (category) => {
             </div>
              <div class="category-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
                 ${filtered.length ? filtered.map(item => `
-                    <div class="article-card" onclick='openArticlePage(${safeJSON(item)})'>
+                    <div class="article-card" onclick='openArticlePage(${articleId(item)})'>
                         <div class="card-img">
                             <img src="${item.img}" loading="lazy">
                             <span class="card-tag">${item.category || 'News'}</span>
@@ -151,7 +151,7 @@ window.filterByCategory = (category) => {
                         <div class="card-body">
                             <div class="card-meta">📅 ${item.date || 'Recent'}</div>
                             <h3 class="card-title">${item.title}</h3>
-                            <div class="card-excerpt">${item.summary || item.desc?.substring(0, 80) + '...'}</div>
+                            <div class="card-excerpt">${item.summary || ''}</div>
                         </div>
                     </div>
                 `).join('') : '<p>No news found in this category.</p>'}
@@ -177,26 +177,26 @@ function renderHeroGrid(items) {
     // Main Story (Big Left)
     if (items[0]) {
         html += `
-        <div class="hero-item hero-main-cell main-story" onclick='openArticlePage(${safeJSON(items[0])})'>
+        <div class="hero-item hero-main-cell main-story" onclick='openArticlePage(${articleId(items[0])})' style="cursor:pointer">
             <img src="${items[0].img}">
             <span class="hero-tag">TOP STORY</span>
             <div class="overlay">
                 <h2>${items[0].title}</h2>
-                <p style="font-size:0.9rem; opacity:0.9; margin-top:5px;">${items[0].summary || items[0].desc?.substring(0, 100)}...</p>
+                <p style="font-size:0.9rem; opacity:0.9; margin-top:5px;">${items[0].summary || ''}...</p>
             </div>
         </div>`;
     }
     // Sub Stories (Right Stack)
     if (items[1]) {
         html += `
-        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${safeJSON(items[1])})'>
+        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${articleId(items[1])})'>
             <img src="${items[1].img}">
             <div class="overlay"><h2>${items[1].title}</h2></div>
         </div>`;
     }
     if (items[2]) {
         html += `
-        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${safeJSON(items[2])})'>
+        <div class="hero-item hero-sub-cell" onclick='openArticlePage(${articleId(items[2])})'>
             <img src="${items[2].img}">
             <div class="overlay"><h2>${items[2].title}</h2></div>
         </div>`;
@@ -208,7 +208,7 @@ function renderGridSection(id, items) {
     const el = document.getElementById(id);
     if (el) {
         el.innerHTML = items.map(item => `
-            <div class="article-card" onclick='openArticlePage(${safeJSON(item)})'>
+            <div class="article-card" onclick='openArticlePage(${articleId(item)})'>
                 <div class="card-img">
                     <img src="${item.img}" loading="lazy">
                      <span class="card-tag">${item.category || 'News'}</span>
@@ -226,7 +226,7 @@ function renderListSection(id, items) {
     const el = document.getElementById(id);
     if (el) {
         el.innerHTML = items.map(item => `
-            <div class="list-item" onclick='openArticlePage(${safeJSON(item)})'>
+            <div class="list-item" onclick='openArticlePage(${articleId(item)})'>
                 <img src="${item.img}" loading="lazy">
                 <div class="list-content">
                     <h3>${item.title}</h3>
@@ -241,7 +241,7 @@ function renderScrollSection(id, items) {
     const el = document.getElementById(id);
     if (el) {
         el.innerHTML = items.map(item => `
-            <div class="scroll-card article-card" onclick='openArticlePage(${safeJSON(item)})'>
+            <div class="scroll-card article-card" onclick='openArticlePage(${articleId(item)})'>
                 <div class="card-img"><img src="${item.img}" loading="lazy"></div>
                 <div class="card-body">
                     <h3 class="card-title" style="font-size:1rem;">${item.title}</h3>
@@ -274,7 +274,7 @@ function renderSidebarWidgets() {
     const container = document.getElementById('sidebar-tab-content');
     if (container) {
         container.innerHTML = trending.map((item, i) => `
-            <div class="mini-list-item" onclick='openArticlePage(${safeJSON(item)})'>
+            <div class="mini-list-item" onclick='openArticlePage(${articleId(item)})'>
                 <div class="mini-count">${i + 1}</div>
                 <div class="mini-title">${item.title}</div>
             </div>
@@ -309,63 +309,79 @@ function safeJSON(item) {
     return JSON.stringify(item).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 }
 
+// Helper: pass just the article ID to openArticlePage for lightweight onclick
+function articleId(item) {
+    return item && item.id ? item.id : 0;
+}
+
 
 // --- ARTICLE VIEW (Overlay) ---
 
-window.openArticlePage = (item) => {
-    // Update Meta
-    document.title = item.title + " | Vadi E Kashmir";
+window.openArticlePage = async (itemOrId) => {
+    // itemOrId may be a small metadata object (from feed) or a full object
+    const id = typeof itemOrId === 'object' ? itemOrId.id : itemOrId;
 
+    // Show overlay with a loading spinner immediately
     const overlay = document.getElementById('article-page-view');
-    overlay.style.display = 'block';
-
-    // Generate Body with Smart Image Injection
-    const lines = (item.desc || item.summary || "").split('\n');
-    let formattedBody = "";
-    let gallery = item.gallery || [];
-    let gIndex = 0;
-
-    // Logic: Inject an image every 3 paragraphs
-    lines.forEach((line, idx) => {
-        if (line.trim().length > 0) formattedBody += `<p>${line}</p>`;
-
-        if (gIndex < gallery.length && (idx + 1) % 3 === 0) {
-            formattedBody += `<div class="article-body-image"><img src="${gallery[gIndex]}"></div>`;
-            gIndex++;
-        }
-    });
-
-    // Append remaining images at bottom
-    if (gIndex < gallery.length) {
-        formattedBody += `<div class="article-bottom-grid">`;
-        while (gIndex < gallery.length) {
-            formattedBody += `<div class="grid-image-item"><img src="${gallery[gIndex]}"></div>`;
-            gIndex++;
-        }
-        formattedBody += `</div>`;
-    }
-
     const wrapper = document.getElementById('article-content-wrapper');
-    wrapper.innerHTML = `
-        <img src="${item.img}" class="art-head-img">
-        <h1 class="art-title">${item.title}</h1>
-        <div class="art-meta">
-            <span>✍️ ${item.author || "Admin"}</span>
-            <span style="margin:0 10px">•</span>
-            <span>📅 ${item.date || "Today"}</span>
-            <span style="margin:0 10px">•</span>
-            <span>📂 ${item.category}</span>
-        </div>
-        <div class="art-body">${formattedBody}</div>
-        <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
-            <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.id}')" 
-                style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px;">
-                <i class="fab fa-whatsapp"></i> Share this News
-            </button>
-        </div>
-    `;
+    overlay.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    wrapper.innerHTML = '<div style="text-align:center;padding:60px;"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Loading article...</p></div>';
 
-    document.body.style.overflow = 'hidden'; // Stop background scrolling
+    try {
+        const res = await fetch(`/api/get_article.php?id=${id}`);
+        if (!res.ok) throw new Error('Failed to load article');
+        const item = await res.json();
+
+        // Update Meta
+        document.title = item.title + " | Vadi E Kashmir";
+
+        // Generate Body with Smart Image Injection
+        const lines = (item.desc || item.summary || "").split('\n');
+        let formattedBody = "";
+        let gallery = item.gallery || [];
+        let gIndex = 0;
+
+        lines.forEach((line, idx) => {
+            if (line.trim().length > 0) formattedBody += `<p>${line}</p>`;
+
+            if (gIndex < gallery.length && (idx + 1) % 3 === 0) {
+                formattedBody += `<div class="article-body-image"><img src="${gallery[gIndex]}"></div>`;
+                gIndex++;
+            }
+        });
+
+        if (gIndex < gallery.length) {
+            formattedBody += `<div class="article-bottom-grid">`;
+            while (gIndex < gallery.length) {
+                formattedBody += `<div class="grid-image-item"><img src="${gallery[gIndex]}"></div>`;
+                gIndex++;
+            }
+            formattedBody += `</div>`;
+        }
+
+        wrapper.innerHTML = `
+            <img src="${item.img}" class="art-head-img">
+            <h1 class="art-title">${item.title}</h1>
+            <div class="art-meta">
+                <span>✍️ ${item.author || "Admin"}</span>
+                <span style="margin:0 10px">•</span>
+                <span>📅 ${item.date || "Today"}</span>
+                <span style="margin:0 10px">•</span>
+                <span>📂 ${item.category}</span>
+            </div>
+            <div class="art-body">${formattedBody}</div>
+            <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
+                <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.id}')" 
+                    style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px;">
+                    <i class="fab fa-whatsapp"></i> Share this News
+                </button>
+            </div>
+        `;
+
+    } catch (e) {
+        wrapper.innerHTML = `<p style="color:red;text-align:center;padding:40px;">Failed to load article. Please try again.<br><small>${e.message}</small></p>`;
+    }
 };
 
 window.closeArticle = () => {
@@ -417,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     <div class="category-block"><div class="section-header"><h2>Search: "${term}"</h2></div>
                     <div class="list-layout">
                         ${matched.map(item => `
-                            <div class="list-item" onclick='openArticlePage(${safeJSON(item)})'>
+                            <div class="list-item" onclick='openArticlePage(${articleId(item)})'>
                                 <img src="${item.img}">
                                 <div class="list-content"><h3>${item.title}</h3></div>
                             </div>

@@ -30,6 +30,14 @@
             "destination": "/api/update_ads.php"
         },
         {
+            "source": "/api/get_article.php",
+            "destination": "/api/get_article.php"
+        },
+        {
+            "source": "/api/get_thumb.php",
+            "destination": "/api/get_thumb.php"
+        },
+        {
             "source": "/news/:id",
             "destination": "/api/share.php?id=:id"
         }
