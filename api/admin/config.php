@@ -16,13 +16,21 @@ try {
     if ($db_url) {
         // Parse Vercel Postgres URL to PDO DSN
         $db_parts = parse_url($db_url);
+        
+        $host = $db_parts['host'] ?? '';
+        $port = $db_parts['port'] ?? 5432;
+        $user = $db_parts['user'] ?? '';
+        $pass = $db_parts['pass'] ?? '';
+        $path = $db_parts['path'] ?? '';
+        $dbnamestr = ltrim($path, "/");
+
         $dsn = "pgsql:" . sprintf(
             "host=%s;port=%s;user=%s;password=%s;dbname=%s;sslmode=require",
-            $db_parts['host'],
-            $db_parts['port'] ?? 5432,
-            $db_parts['user'],
-            $db_parts['pass'],
-            ltrim($db_parts['path'], "/")
+            $host,
+            $port,
+            $user,
+            $pass,
+            $dbnamestr
         );
         $conn = new PDO($dsn);
     } else {
@@ -34,8 +42,11 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 
-} catch (PDOException $e) {
-    die("Connection failed: " . $e->getMessage());
+} catch (\Throwable $e) {
+    http_response_code(500);
+    header("Content-Type: application/json");
+    echo json_encode(["error" => "Connection failed: " . $e->getMessage()]);
+    exit();
 }
 // PDO connection established as $conn
 
