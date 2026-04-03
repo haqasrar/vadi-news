@@ -16,7 +16,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="ramadan.css">
 
     <!-- SEO Meta Tags -->
     <meta property="og:type" content="website">
@@ -29,45 +28,14 @@
     <!-- AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1558476577024315"
         crossorigin="anonymous"></script>
+
+    <!-- PDF & Rich Text CSS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 </head>
 
 <body>
 
-    <!-- RAMADAN DECORATIONS -->
-    <!-- RAMADAN DECORATIONS (Drop & Glow) -->
-    <!-- RAMADAN DECORATIONS (SVG Realistic) -->
-    <!-- RAMADAN PARTICLES (Floating Stars & Moons) -->
-    <div class="ramadan-particles">
-        <!-- Stars -->
-        <div class="p-star s1"></div>
-        <div class="p-star s2"></div>
-        <div class="p-star s3"></div>
-        <div class="p-star s4"></div>
-        <div class="p-star s5"></div>
-        <div class="p-star s6"></div>
-        <div class="p-star s7"></div>
-        <div class="p-star s8"></div>
-        <div class="p-star s9"></div>
-        <div class="p-star s10"></div>
-
-        <!-- Moons (Inline SVG for sharpness) -->
-        <div class="p-moon m1"><svg viewBox="0 0 24 24">
-                <path
-                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8c.46 0 .91.05 1.34.12-2.3 1.63-3.74 4.29-3.74 7.24s1.44 5.61 3.74 7.24c-.43.07-.88.12-1.34.12z" />
-            </svg></div>
-        <div class="p-moon m2"><svg viewBox="0 0 24 24">
-                <path
-                    d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.89-.06-1.8.03-2.63.18z" />
-            </svg></div>
-        <div class="p-moon m3"><svg viewBox="0 0 24 24">
-                <path
-                    d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.89-.06-1.8.03-2.63.18z" />
-            </svg></div>
-        <div class="p-moon m4"><svg viewBox="0 0 24 24">
-                <path
-                    d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.89-.06-1.8.03-2.63.18z" />
-            </svg></div>
-    </div>
 
     <!-- 1. TOP BAR (Date, Socials, Theme) -->
     <div class="top-bar">
@@ -112,6 +80,7 @@
         <div class="container nav-inner">
             <ul class="nav-links">
                 <li><a onclick="filterByCategory('all')" class="active"><i class="fas fa-home"></i> Home</a></li>
+                <li><a onclick="filterByCategory('Awareness')">Awareness</a></li>
                 <li><a onclick="filterByCategory('J & K')">J & K</a></li>
                 <li><a onclick="filterByCategory('Nation')">Nation</a></li>
                 <li><a onclick="filterByCategory('World')">World</a></li>
@@ -133,6 +102,7 @@
         <div class="mobile-menu-content">
             <button class="close-menu" onclick="toggleMobileMenu()">&times;</button>
             <a onclick="filterByCategory('all'); toggleMobileMenu()">Home</a>
+            <a onclick="filterByCategory('Awareness'); toggleMobileMenu()">Awareness</a>
             <a onclick="filterByCategory('J & K'); toggleMobileMenu()">J & K</a>
             <a onclick="filterByCategory('Nation'); toggleMobileMenu()">Nation</a>
             <a onclick="filterByCategory('World'); toggleMobileMenu()">World</a>
@@ -267,10 +237,17 @@
 
     <!-- ARTICLE READING VIEW (Overlay) -->
     <div id="article-page-view" class="article-overlay">
-        <div class="article-container">
+        <div class="article-container" id="pdf-container-element">
             <div class="article-controls">
-                <button onclick="closeArticle()" class="close-article-btn"><i class="fas fa-arrow-left"></i> Back to
+                <button onclick="closeArticle()" class="close-article-btn" data-html2canvas-ignore="true"><i class="fas fa-arrow-left"></i> Back to
                     News</button>
+            </div>
+            
+            <!-- Hidden PDF Branding -->
+            <div id="pdf-brand-branding" style="display:none; text-align:center; padding: 20px; border-bottom: 2px solid #b91c1c; margin-bottom: 20px;">
+                <img src="images/Logo.png" alt="Logo" style="width: 60px; display: block; margin: 0 auto 10px;">
+                <h1 style="color: #b91c1c; margin: 0; font-family: Merriweather, serif;">VADI E KASHMIR</h1>
+                <p style="margin: 0; font-size: 14px; color: #555;">The Voice of the Valley</p>
             </div>
             <div id="article-content-wrapper">
                 <!-- Dynamic Article Content -->

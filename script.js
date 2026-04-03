@@ -344,27 +344,32 @@ window.openArticlePage = async (itemOrId) => {
         document.title = item.title + " | Vadi E Kashmir";
 
         // Generate Body with Smart Image Injection
-        const lines = (item.desc || item.summary || "").split('\n');
         let formattedBody = "";
-        let gallery = item.gallery || [];
-        let gIndex = 0;
+        if (item.category === 'Awareness') {
+            // Native HTML formatting for rich text
+            formattedBody = `<div class="ql-editor">${item.desc || item.summary || ""}</div>`;
+        } else {
+            const lines = (item.desc || item.summary || "").split('\n');
+            let gallery = item.gallery || [];
+            let gIndex = 0;
 
-        lines.forEach((line, idx) => {
-            if (line.trim().length > 0) formattedBody += `<p>${line}</p>`;
+            lines.forEach((line, idx) => {
+                if (line.trim().length > 0) formattedBody += `<p>${line}</p>`;
 
-            if (gIndex < gallery.length && (idx + 1) % 3 === 0) {
-                formattedBody += `<div class="article-body-image"><img src="${gallery[gIndex]}"></div>`;
-                gIndex++;
+                if (gIndex < gallery.length && (idx + 1) % 3 === 0) {
+                    formattedBody += `<div class="article-body-image"><img src="${gallery[gIndex]}"></div>`;
+                    gIndex++;
+                }
+            });
+
+            if (gIndex < gallery.length) {
+                formattedBody += `<div class="article-bottom-grid">`;
+                while (gIndex < gallery.length) {
+                    formattedBody += `<div class="grid-image-item"><img src="${gallery[gIndex]}"></div>`;
+                    gIndex++;
+                }
+                formattedBody += `</div>`;
             }
-        });
-
-        if (gIndex < gallery.length) {
-            formattedBody += `<div class="article-bottom-grid">`;
-            while (gIndex < gallery.length) {
-                formattedBody += `<div class="grid-image-item"><img src="${gallery[gIndex]}"></div>`;
-                gIndex++;
-            }
-            formattedBody += `</div>`;
         }
 
         wrapper.innerHTML = `
@@ -378,10 +383,14 @@ window.openArticlePage = async (itemOrId) => {
                 <span>📂 ${item.category}</span>
             </div>
             <div class="art-body">${formattedBody}</div>
-            <div style="margin-top:40px; border-top:1px solid #eee; padding-top:20px;">
+            <div data-html2canvas-ignore="true" style="margin-top:40px; border-top:1px solid #eee; padding-top:20px; display:flex; gap:10px;">
                 <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.id}')" 
-                    style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px;">
+                    style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px; cursor:pointer;">
                     <i class="fab fa-whatsapp"></i> Share this News
+                </button>
+                <button onclick="downloadPDF('${item.title.replace(/'/g, "\\'")}')" 
+                    style="background:#b91c1c; color:white; border:none; padding:10px 20px; border-radius:30px; cursor:pointer;">
+                    <i class="fas fa-file-pdf"></i> Download PDF
                 </button>
             </div>
         `;
@@ -395,6 +404,32 @@ window.closeArticle = () => {
     document.getElementById('article-page-view').style.display = 'none';
     document.body.style.overflow = 'auto';
     document.title = "Vadi E Kashmir | Your Trusted News Source";
+};
+
+window.downloadPDF = async (title) => {
+    const element = document.getElementById('pdf-container-element');
+    const brandNode = document.getElementById('pdf-brand-branding');
+    
+    // Temporarily show branding before PDF generation
+    brandNode.style.display = 'block';
+
+    const opt = {
+        margin:       0.5,
+        filename:     `${title}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+    };
+
+    // Make sure images have page-break-inside avoid
+    const images = element.querySelectorAll('img');
+    images.forEach(img => img.style.pageBreakInside = 'avoid');
+
+    await html2pdf().set(opt).from(element).save();
+
+    // Hide branding again
+    brandNode.style.display = 'none';
 };
 
 window.shareArticle = async (title, id) => {

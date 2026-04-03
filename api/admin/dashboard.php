@@ -12,6 +12,7 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard - Vadi E Kashmir</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <style>
         /* --- RESET & BASE --- */
         * { box-sizing: border-box; outline: none; }
@@ -94,6 +95,7 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                         <div>
                             <label>Category</label>
                             <select id="newsCategory" name="category">
+                                <option value="Awareness">Awareness</option>
                                 <option value="J & K">J & K</option>
                                 <option value="Nation">Nation</option>
                                 <option value="Updates">Updates</option>
@@ -106,7 +108,9 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                     </div>
                     <label>Headline</label><input type="text" id="title" name="title" required>
                     <label>Writer</label><input type="text" id="author" name="author" placeholder="Admin">
-                    <label>Description (You can paste links)</label><textarea id="desc" name="desc" style="height:100px"></textarea>
+                    <label>Content / Description (For Awareness Articles, use this editor carefully. Add images natively above or use formatting below)</label>
+                    <div id="editor-container" style="height: 300px; background: white;"></div>
+                    <input type="hidden" id="desc" name="desc">
                     
                     <!-- We will use Base64 for images to keep it simple or handle multipart -->
                     <label>Main Image (Automatically Compresses)</label><input type="file" id="mainImg">
@@ -166,7 +170,22 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
         </div>
     </div>
 
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script>
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    ['image', 'link', 'blockquote'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    [{ 'align': [] }],
+                    ['clean']
+                ]
+            }
+        });
+
         // --- NAVIGATION ---
         window.showPage = function(pid, el) {
             document.querySelectorAll('.page-section').forEach(p=>p.classList.remove('active'));
@@ -227,10 +246,14 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                 gal.push(await resizeImage(g));
             }
 
+            // Use Quill HTML content
+            let descValue = quill.root.innerHTML;
+            if (descValue === '<p><br></p>') descValue = ""; 
+
             const data = {
                 title: document.getElementById('title').value,
                 author: document.getElementById('author').value,
-                desc: document.getElementById('desc').value,
+                desc: descValue,
                 type: document.getElementById('newsType').value,
                 category: document.getElementById('newsCategory').value,
                 video: document.getElementById('videoLink').value,

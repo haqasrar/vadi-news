@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS news (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     author VARCHAR(100) DEFAULT 'Admin',
-    description TEXT,
+    description LONGTEXT,
     category VARCHAR(50),
     type VARCHAR(20) DEFAULT 'standard', -- 'hero', 'standard', 'breaking'
     main_image VARCHAR(255),
