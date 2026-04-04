@@ -345,7 +345,7 @@ window.openArticlePage = async (itemOrId) => {
 
         // Generate Body with Smart Image Injection
         let formattedBody = "";
-        if (item.category === 'Awareness') {
+        if (item.category === 'Article' || item.category === 'Awareness') {
             // Native HTML formatting for rich text
             formattedBody = `<div class="ql-editor">${item.desc || item.summary || ""}</div>`;
         } else {

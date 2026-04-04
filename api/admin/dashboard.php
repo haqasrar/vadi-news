@@ -95,7 +95,7 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                         <div>
                             <label>Category</label>
                             <select id="newsCategory" name="category">
-                                <option value="Awareness">Awareness</option>
+                                <option value="Article">Article</option>
                                 <option value="J & K">J & K</option>
                                 <option value="Nation">Nation</option>
                                 <option value="Updates">Updates</option>
@@ -108,7 +108,7 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                     </div>
                     <label>Headline</label><input type="text" id="title" name="title" required>
                     <label>Writer</label><input type="text" id="author" name="author" placeholder="Admin">
-                    <label>Content / Description (For Awareness Articles, use this editor carefully. Add images natively above or use formatting below)</label>
+                    <label>Content / Description (For Articles, use this editor carefully. Add images natively above or use formatting below)</label>
                     <div id="editor-container" style="height: 300px; background: white;"></div>
                     <input type="hidden" id="desc" name="desc">
                     
