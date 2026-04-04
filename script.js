@@ -416,8 +416,16 @@ window.downloadPDF = async (title) => {
     const element = document.getElementById('pdf-container-element');
     const brandNode = document.getElementById('pdf-brand-branding');
     
-    // Temporarily show branding before PDF generation
+    // 1. Prepare for Newspaper Look
     brandNode.style.display = 'block';
+    element.classList.add('is-generating-pdf'); // Triggers justified text in CSS
+
+    // Fill date stamp
+    const dateStamp = document.getElementById('pdf-date-stamp');
+    if (dateStamp) {
+        const now = new Date();
+        dateStamp.innerText = now.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
 
     const opt = {
         margin:       [0.5, 0.5],
@@ -440,13 +448,35 @@ window.downloadPDF = async (title) => {
         // Standardize image page breaks
         images.forEach(img => img.style.pageBreakInside = 'avoid');
 
-        await html2pdf().set(opt).from(element).save();
+        // 2. Generate PDF
+        const worker = html2pdf().set(opt).from(element);
+
+        // Check if we should SHARE or DOWNLOAD
+        if (navigator.share && navigator.canShare) {
+            const pdfBlob = await worker.output('blob');
+            const pdfFile = new File([pdfBlob], opt.filename, { type: 'application/pdf' });
+
+            if (navigator.canShare({ files: [pdfFile] })) {
+                await navigator.share({
+                    files: [pdfFile],
+                    title: title,
+                    text: 'Check out this article from Vadi E Kashmir'
+                });
+            } else {
+                await worker.save();
+            }
+        } else {
+            await worker.save();
+        }
+
     } catch (err) {
-        console.error("PDF Export Error:", err);
-        alert("Failed to generate PDF. Please try again.");
+        console.error("PDF Export/Share Error:", err);
+        // Fallback to simple save if share fails
+        try { await html2pdf().set(opt).from(element).save(); } catch(e) {}
     } finally {
-        // Hide branding again
+        // Cleanup
         brandNode.style.display = 'none';
+        element.classList.remove('is-generating-pdf');
     }
 };
 

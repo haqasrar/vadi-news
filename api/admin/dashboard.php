@@ -171,7 +171,13 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
     </div>
 
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-drop-module@1.0.3/image-drop.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill-image-resize-module@3.0.0/image-resize.min.js"></script>
     <script>
+        // Register Modules
+        Quill.register('modules/imageDrop', QuillImageDrop.ImageDrop);
+        Quill.register('modules/imageResize', ImageResize.default || ImageResize);
+
         var quill = new Quill('#editor-container', {
             theme: 'snow',
             modules: {
@@ -182,7 +188,11 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
                     [{ 'align': [] }],
                     ['clean']
-                ]
+                ],
+                imageDrop: true,
+                imageResize: {
+                    displaySize: true
+                }
             }
         });
 
