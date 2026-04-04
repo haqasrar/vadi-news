@@ -1252,6 +1252,9 @@ button {
     margin-bottom: 15px;
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .close-article-btn {
@@ -1264,6 +1267,42 @@ button {
     align-items: center;
     gap: 8px;
     padding: 5px;
+    transition: var(--transition);
+}
+
+.close-article-btn:hover {
+    color: var(--primary);
+    transform: translateX(-3px);
+}
+
+.pdf-btn-top {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.pdf-btn-top:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+@media (max-width: 480px) {
+    .pdf-btn-top span {
+        display: none;
+    }
+    .pdf-btn-top {
+        padding: 8px 12px;
+    }
 }
 
 /* Article Content Styles */

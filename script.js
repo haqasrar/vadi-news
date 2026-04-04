@@ -383,14 +383,14 @@ window.openArticlePage = async (itemOrId) => {
                 <span>📂 ${item.category}</span>
             </div>
             <div class="art-body">${formattedBody}</div>
-            <div data-html2canvas-ignore="true" style="margin-top:40px; border-top:1px solid #eee; padding-top:20px; display:flex; gap:10px;">
+            <div data-html2canvas-ignore="true" style="margin-top:40px; border-top:1px solid #eee; padding-top:20px; display:flex; flex-wrap:wrap; gap:12px;">
                 <button onclick="shareArticle('${item.title.replace(/'/g, "\\'")}', '${item.id}')" 
-                    style="background:#25d366; color:white; border:none; padding:10px 20px; border-radius:30px; cursor:pointer;">
-                    <i class="fab fa-whatsapp"></i> Share this News
+                    style="background:#25d366; color:white; border:none; padding:12px 24px; border-radius:30px; cursor:pointer; font-weight:700; display:flex; align-items:center; gap:8px; transition:0.2s;">
+                    <i class="fab fa-whatsapp"></i> Share on WhatsApp
                 </button>
                 <button onclick="downloadPDF('${item.title.replace(/'/g, "\\'")}')" 
-                    style="background:#b91c1c; color:white; border:none; padding:10px 20px; border-radius:30px; cursor:pointer;">
-                    <i class="fas fa-file-pdf"></i> Download PDF
+                    style="background:#b91c1c; color:white; border:none; padding:12px 24px; border-radius:30px; cursor:pointer; font-weight:700; display:flex; align-items:center; gap:8px; transition:0.2s;">
+                    <i class="fas fa-file-pdf"></i> Share as PDF
                 </button>
             </div>
         `;
@@ -407,6 +407,12 @@ window.closeArticle = () => {
 };
 
 window.downloadPDF = async (title) => {
+    // If no title provided, try to find it in the DOM
+    if (!title) {
+        const titleEl = document.querySelector('.art-title');
+        title = titleEl ? titleEl.innerText : 'Article';
+    }
+
     const element = document.getElementById('pdf-container-element');
     const brandNode = document.getElementById('pdf-brand-branding');
     
@@ -414,22 +420,34 @@ window.downloadPDF = async (title) => {
     brandNode.style.display = 'block';
 
     const opt = {
-        margin:       0.5,
-        filename:     `${title}.pdf`,
+        margin:       [0.5, 0.5],
+        filename:     `${title.substring(0, 50)}.pdf`,
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
         jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    // Make sure images have page-break-inside avoid
-    const images = element.querySelectorAll('img');
-    images.forEach(img => img.style.pageBreakInside = 'avoid');
+    try {
+        // Ensure all images are loaded
+        const images = element.querySelectorAll('img');
+        const promises = Array.from(images).map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+        });
+        await Promise.all(promises);
 
-    await html2pdf().set(opt).from(element).save();
+        // Standardize image page breaks
+        images.forEach(img => img.style.pageBreakInside = 'avoid');
 
-    // Hide branding again
-    brandNode.style.display = 'none';
+        await html2pdf().set(opt).from(element).save();
+    } catch (err) {
+        console.error("PDF Export Error:", err);
+        alert("Failed to generate PDF. Please try again.");
+    } finally {
+        // Hide branding again
+        brandNode.style.display = 'none';
+    }
 };
 
 window.shareArticle = async (title, id) => {
