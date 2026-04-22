@@ -119,6 +119,9 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                     <label>Video URL</label><input type="text" id="videoLink" name="video">
                     
                     <button type="submit" class="btn" id="publishBtn">Publish News</button>
+                    <p style="font-size: 0.85rem; color: #666; margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 4px;">
+                        <strong>ℹ️ Note:</strong> Publishing news will NOT automatically add it to Ticker. Hero/Top layouts are for homepage display only. To add breaking news to the Ticker, use the separate "Ticker" section.
+                    </p>
                 </form>
             </div>
         </div>
@@ -292,7 +295,7 @@ if(!isset($_COOKIE['admin_token']) || $_COOKIE['admin_token'] !== md5("vadi_secu
                 const result = await response.json();
                 
                 if(result.success) {
-                    alert("✅ Published Successfully!"); 
+                    alert("✅ Published Successfully!\n\n💡 Tip: If you want this news to also appear in the Ticker section, go to the 'Ticker' tab and add it manually."); 
                     e.target.reset();
                 } else {
                     alert("Error: " + result.message);

@@ -22,6 +22,9 @@ try {
     $main_image_base64 = $data['main_image']; // Already Base64 from frontend
 
     // Insert News (Store Image Base64 directly)
+    // NOTE: News posts are ONLY inserted into the news table
+    // Ticker entries must be created separately via post_ticker.php
+    // This prevents automatic ticker posting when news is published as "hero" type
     $stmt = $conn->prepare("INSERT INTO news (title, author, description, category, type, main_image, video_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
     $stmt->execute([$title, $author, $desc, $category, $type, $main_image_base64, $video]);
     
@@ -35,7 +38,7 @@ try {
         }
     }
     
-    echo json_encode(["success"=>true, "id"=>$news_id]);
+    echo json_encode(["success"=>true, "id"=>$news_id, "message"=>"News published successfully. Use Ticker section to add to ticker if needed."]);
 
 } catch(PDOException $e) {
     http_response_code(500);
