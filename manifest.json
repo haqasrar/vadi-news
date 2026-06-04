@@ -1,0 +1,24 @@
+{
+  "id": "/",
+  "name": "Vadi E Kashmir",
+  "short_name": "Vadi News",
+  "description": "The Voice of the Valley - Trusted News Source",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#b30000",
+  "icons": [
+    {
+      "src": "/images/Logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/Logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
