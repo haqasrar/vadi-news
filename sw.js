@@ -1,8 +1,8 @@
-const CACHE_NAME = 'vadi-news-cache-v1.1';
+const CACHE_NAME = 'vadi-news-cache-v1.4';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/style.css',
+  '/style.css?v=2026061703',
   '/script.js',
   '/images/icon-192.png',
   '/images/icon-512.png'
@@ -14,6 +14,21 @@ self.addEventListener('install', event => {
       .then(cache => {
         return cache.addAll(urlsToCache);
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+            console.log('Service Worker: Clearing Old Cache', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
   );
 });
 
