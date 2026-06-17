@@ -208,16 +208,61 @@ button {
     }
 }
 
-/* --- 2. MAIN HEADER (Clean Editorial) --- */
+/* --- 2. MAIN HEADER (Tricolor Flag 3D Theme) --- */
 .main-header {
-    background: var(--bg-white);
-    padding: 2rem 0;
-    border-bottom: double 3px var(--border-light);
-    /* Classic newspaper style */
+    background-image: 
+        /* Dynamic 3D lighting/ripple overlay */
+        linear-gradient(105deg, 
+            rgba(255,255,255,0.2) 0%, 
+            rgba(255,255,255,0.45) 15%, 
+            rgba(0,0,0,0.15) 30%, 
+            rgba(255,255,255,0.35) 45%, 
+            rgba(0,0,0,0.2) 60%, 
+            rgba(255,255,255,0.4) 75%, 
+            rgba(0,0,0,0.18) 90%, 
+            rgba(255,255,255,0.15) 100%
+        ),
+        /* Tricolor base */
+        linear-gradient(to bottom, 
+            #FF671F 0%, #FF671F 33.33%, 
+            #FFFFFF 33.33%, #FFFFFF 66.66%, 
+            #046A38 66.66%, #046A38 100%
+        );
+    background-size: 200% 100%;
+    animation: flagWave 15s ease-in-out infinite;
+    padding: 3.5rem 0;
+    border-bottom: 5px solid #000080; /* Navy Blue bottom border to ground the design */
     text-align: center;
     position: relative;
-    box-shadow: none;
-    /* Flat design */
+    box-shadow: 
+        0 10px 30px rgba(0,0,0,0.12),
+        inset 0 -3px 6px rgba(0,0,0,0.1),
+        inset 0 3px 6px rgba(255,255,255,0.3);
+    overflow: hidden;
+}
+
+@keyframes flagWave {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.header-chakra-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 220px;
+    height: 220px;
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 1;
+    animation: spinChakra 120s linear infinite;
+}
+
+@keyframes spinChakra {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .brand-centered {
@@ -225,6 +270,36 @@ button {
     justify-content: center;
     align-items: center;
     width: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+.brand-card-3d {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 1.5rem 2.5rem;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.12),
+        0 5px 15px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: perspective(1000px) rotateX(1deg);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-card-3d:hover {
+    transform: perspective(1000px) rotateX(0deg) translateY(-4px);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.18),
+        0 10px 25px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.93);
+    border-color: rgba(255, 255, 255, 0.7);
 }
 
 .brand-logo-center {
@@ -245,7 +320,13 @@ button {
 .brand-logo-center img {
     width: 80px;
     height: 80px;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    border-radius: 12px;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.15));
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo-center:hover img {
+    transform: rotate(5deg) scale(1.05);
 }
 
 @media (min-width: 768px) {
@@ -267,34 +348,72 @@ button {
 
 .brand-text-center h1 {
     font-family: var(--font-heading);
-    font-size: 2.4rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    color: var(--primary);
-    /* Solid, Vibrant Color */
-    line-height: 1;
+    color: #000080; /* Navy Blue color of Ashoka Chakra */
+    line-height: 1.1;
     margin: 0;
-    letter-spacing: -1px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    /* Subtle depth */
+    letter-spacing: 1px;
+    text-shadow: 
+        0 1px 0 #e2e8f0,
+        0 2px 0 #cbd5e1,
+        0 3px 0 #94a3b8,
+        0 4px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @media (min-width: 768px) {
     .brand-text-center h1 {
-        font-size: 3.8rem;
-        letter-spacing: -2px;
+        font-size: 3.4rem;
+        letter-spacing: 2px;
+        text-shadow: 
+            0 1px 0 #e2e8f0,
+            0 2px 0 #cbd5e1,
+            0 3px 0 #94a3b8,
+            0 4px 0 #64748b,
+            0 5px 12px rgba(0, 0, 0, 0.2);
     }
+}
+
+.brand-logo-center:hover .brand-text-center h1 {
+    text-shadow: 
+        0 1px 0 #cbd5e1,
+        0 2px 0 #94a3b8,
+        0 3px 0 #64748b,
+        0 4px 0 #475569,
+        0 8px 16px rgba(0, 0, 0, 0.25);
 }
 
 .brand-text-center .tagline {
     font-size: 0.75rem;
-    color: var(--text-muted);
+    color: #475569;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 3px;
-    margin-top: 5px;
+    margin-top: 10px;
+    padding-top: 8px;
     display: block;
-    border-top: 2px solid var(--accent);
-    padding-top: 5px;
+    position: relative;
+}
+
+.brand-text-center .tagline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(to right, #FF671F, #000080, #046A38);
+    border-radius: 2px;
+}
+
+@media (min-width: 768px) {
+    .brand-text-center .tagline::before {
+        left: 0;
+        transform: none;
+        width: 140px;
+    }
 }
 
 /* --- 3. NAVIGATION (Sticky Glassmorphism) --- */
@@ -1488,4 +1607,87 @@ body.dark-mode .tab-btn {
 body.dark-mode .tab-btn.active {
     background: var(--bg-white);
     color: var(--primary);
+}
+
+/* --- DARK MODE TRICOLOR HEADER OVERRIDES --- */
+body.dark-mode header.main-header {
+    background-image: 
+        linear-gradient(105deg, 
+            rgba(255,255,255,0.03) 0%, 
+            rgba(255,255,255,0.08) 15%, 
+            rgba(0,0,0,0.35) 30%, 
+            rgba(255,255,255,0.05) 45%, 
+            rgba(0,0,0,0.4) 60%, 
+            rgba(255,255,255,0.08) 75%, 
+            rgba(0,0,0,0.45) 90%, 
+            rgba(255,255,255,0.03) 100%
+        ),
+        linear-gradient(to bottom, 
+            #c2410c 0%, #c2410c 33.33%, 
+            #1e293b 33.33%, #1e293b 66.66%, 
+            #064e3b 66.66%, #064e3b 100%
+        );
+    border-bottom-color: #1e3a8a;
+    box-shadow: 
+        0 10px 30px rgba(0,0,0,0.4),
+        inset 0 -3px 6px rgba(0,0,0,0.3),
+        inset 0 3px 6px rgba(255,255,255,0.05);
+}
+
+body.dark-mode .header-chakra-bg {
+    opacity: 0.15;
+}
+
+body.dark-mode .header-chakra-bg circle,
+body.dark-mode .header-chakra-bg line {
+    stroke: #38bdf8 !important;
+}
+
+body.dark-mode .brand-card-3d {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .brand-card-3d:hover {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .brand-text-center h1 {
+    color: #e2e8f0;
+    text-shadow: 
+        0 1px 0 #475569,
+        0 2px 0 #334155,
+        0 3px 0 #1e293b,
+        0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+@media (min-width: 768px) {
+    body.dark-mode .brand-text-center h1 {
+        text-shadow: 
+            0 1px 0 #475569,
+            0 2px 0 #334155,
+            0 3px 0 #1e293b,
+            0 4px 0 #0f172a,
+            0 5px 12px rgba(0, 0, 0, 0.6);
+    }
+}
+
+body.dark-mode .brand-logo-center:hover .brand-text-center h1 {
+    text-shadow: 
+        0 1px 0 #334155,
+        0 2px 0 #1e293b,
+        0 3px 0 #0f172a,
+        0 4px 0 #020617,
+        0 8px 16px rgba(0, 0, 0, 0.7);
+}
+
+body.dark-mode .brand-text-center .tagline {
+    color: #94a3b8;
 }
