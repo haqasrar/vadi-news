@@ -543,29 +543,37 @@ window.showAboutUs = () => {
                 <div class="team-section">
                     <h3>Our Team</h3>
                     <div class="team-grid-3d">
-                        <div class="member-card-3d">
+                        <!-- Faisal Khan -->
+                        <div class="member-card-3d founder-card">
                             <div class="member-avatar">
-                                <i class="fas fa-user-tie"></i>
+                                <img src="images/founder.jpeg" alt="Faisal Khan" style="display: none;" onload="this.style.display='block'; if(this.nextElementSibling) this.nextElementSibling.style.display='none';" onerror="this.style.display='none';">
+                                <div class="fallback-icon">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
                             </div>
-                            <h4>Faisal Pathan</h4>
-                            <span class="member-role">Founder & Editor-in-Chief</span>
-                            <p class="member-bio">A passionate visionary dedicated to giving a voice to the unheard. Faisal established Vadi E Kashmir to build a reliable media platform focused on grassroots reporting, community empowerment, and honest editorial coverage of Jammu & Kashmir.</p>
+                            <h4>Faisal Khan</h4>
+                            <span class="member-role role-founder">Founder & Editor-in-Chief</span>
+                            <p class="member-bio">I am currently pursuing a degree in Automobile Engineering in Srinagar, Kashmir. I completed my Class 10 education from RANA Army Goodwill School, Hajin, and my Class 12 education from Government Higher Secondary School, Hajin. Recently, I was honored with an award by Youth Inspiration and a filmmaker, presented by a senior Army officer in recognition of my contributions to society. Although I am not a professional journalist, I have actively highlighted public grievances and community concerns with the support and cooperation of the local administration, contributing to positive community engagement and public welfare.</p>
                             <div class="member-socials">
                                 <a href="https://x.com/MrFaisalPathan1" target="_blank"><i class="fab fa-twitter"></i></a>
-                                <a href="https://www.instagram.com/driftsoulkhan/" target="_blank"><i class="fab fa-instagram"></i></a>
+                                <a href="https://www.instagram.com/faisukhan2620?igsh=MXhyMnY5bHB0ZjRnYg==" target="_blank"><i class="fab fa-instagram"></i></a>
                             </div>
                         </div>
 
-                        <div class="member-card-3d">
+                        <!-- Mohammad Asrar -->
+                        <div class="member-card-3d developer-card">
                             <div class="member-avatar">
-                                <i class="fas fa-code"></i>
+                                <img src="images/Asrar.png" alt="Mohammad Asrar" style="display: none;" onload="this.style.display='block'; if(this.nextElementSibling) this.nextElementSibling.style.display='none';" onerror="this.style.display='none';">
+                                <div class="fallback-icon">
+                                    <i class="fas fa-code"></i>
+                                </div>
                             </div>
-                            <h4>Haq Asrar</h4>
-                            <span class="member-role">Lead Developer & Designer</span>
-                            <p class="member-bio">An innovative developer focused on crafting performant, user-centric web applications. Haq designed and built the Vadi E Kashmir platform, integrating modern PWA capabilities, responsive layout architectures, and highly polished visual aesthetics.</p>
+                            <h4>Mohammad Asrar</h4>
+                            <span class="member-role role-dev">Lead Developer & Designer</span>
+                            <p class="member-bio">I am Mohammad Asrar ul Haque Ahanger, a developer from Kashmir who believes in using technology, innovation, and knowledge to contribute to society. My vision is to showcase the talent, creativity, and potential of Kashmir through meaningful work, inspire positive change, and help build a brighter future for the next generation.</p>
                             <div class="member-socials">
-                                <a href="mailto:contact@vadiekashmir.com"><i class="fas fa-envelope"></i></a>
-                                <a href="tel:+917006942620"><i class="fas fa-phone"></i></a>
+                                <a href="haqasrar264@gmail.com"><i class="fas fa-envelope"></i></a>
+                                <a href="tel:+916005136257"><i class="fas fa-phone"></i></a>
                             </div>
                         </div>
                     </div>

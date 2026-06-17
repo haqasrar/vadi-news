@@ -1841,15 +1841,11 @@ body.dark-mode .brand-text-center .tagline {
 }
 
 .team-grid-3d {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 24px;
-}
-
-@media (min-width: 768px) {
-    .team-grid-3d {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    width: 100%;
 }
 
 .member-card-3d {
@@ -1858,7 +1854,6 @@ body.dark-mode .brand-text-center .tagline {
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 16px;
     padding: 2.5rem 2rem;
-    text-align: center;
     box-shadow: 
         0 20px 40px rgba(0, 0, 0, 0.08),
         inset 0 1px 0 rgba(255, 255, 255, 0.6);
@@ -1868,6 +1863,8 @@ body.dark-mode .brand-text-center .tagline {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    flex: 1 1 300px;
+    max-width: 420px;
 }
 
 .member-card-3d:hover {
@@ -1880,22 +1877,41 @@ body.dark-mode .brand-text-center .tagline {
 }
 
 .member-avatar {
-    width: 80px;
-    height: 80px;
+    width: 100%;
+    max-width: 260px;
+    height: 220px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 80%, rgba(0, 0, 0, 0) 100%);
+}
+
+.member-avatar .fallback-icon {
+    width: 90px;
+    height: 90px;
     background: linear-gradient(135deg, #FF671F 0%, #000080 50%, #046A38 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #ffffff;
-    font-size: 2.2rem;
-    margin-bottom: 1.25rem;
+    font-size: 2.5rem;
     box-shadow: 0 8px 16px rgba(0, 0, 80, 0.2);
-    transition: transform 0.4s ease;
 }
 
 .member-card-3d:hover .member-avatar {
-    transform: scale(1.08) rotate(5deg);
+    transform: scale(1.04) rotate(2deg);
 }
 
 .member-card-3d h4 {
@@ -1924,7 +1940,7 @@ body.dark-mode .brand-text-center .tagline {
     color: var(--text-muted);
     margin: 0 0 1.5rem 0;
     flex-grow: 1;
-    text-align: center;
+    text-align: left;
 }
 
 .member-socials {
@@ -1999,4 +2015,92 @@ body.dark-mode .member-socials a {
 body.dark-mode .member-socials a:hover {
     background: #38bdf8;
     color: #0f172a;
+}
+
+/* --- Unified Team Card (3D Balanced Design) --- */
+.unified-team-card-3d {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.08),
+        0 10px 20px -5px rgba(0, 0, 0, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    position: relative;
+    transform: perspective(1000px) rotateX(1deg);
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 100%;
+}
+
+.unified-team-card-3d:hover {
+    transform: perspective(1000px) rotateX(0deg) translateY(-5px);
+    box-shadow: 
+        0 35px 70px -15px rgba(0, 0, 0, 0.15),
+        0 15px 30px -10px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.team-member-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.team-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255, 103, 31, 0) 0%, rgba(0, 0, 128, 0.2) 50%, rgba(4, 106, 56, 0) 100%);
+    margin: 10px 0;
+}
+
+@media (min-width: 768px) {
+    .unified-team-card-3d {
+        flex-direction: row;
+        padding: 3.5rem 3rem;
+        gap: 30px;
+    }
+    
+    .team-divider {
+        width: 1px;
+        height: auto;
+        align-self: stretch;
+        background: linear-gradient(to bottom, rgba(255, 103, 31, 0) 0%, rgba(0, 0, 128, 0.2) 50%, rgba(4, 106, 56, 0) 100%);
+        margin: 0 15px;
+    }
+}
+
+/* Dark Mode Overrides for Unified Card */
+body.dark-mode .unified-team-card-3d {
+    background: rgba(30, 41, 59, 0.85);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .unified-team-card-3d:hover {
+    background: rgba(30, 41, 59, 0.93);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 35px 70px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .team-divider {
+    background: linear-gradient(to right, rgba(255, 103, 31, 0) 0%, rgba(56, 189, 248, 0.2) 50%, rgba(4, 106, 56, 0) 100%);
+}
+
+@media (min-width: 768px) {
+    body.dark-mode .team-divider {
+        background: linear-gradient(to bottom, rgba(255, 103, 31, 0) 0%, rgba(56, 189, 248, 0.2) 50%, rgba(4, 106, 56, 0) 100%);
+    }
 }

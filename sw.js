@@ -1,14 +1,15 @@
-const CACHE_NAME = 'vadi-news-cache-v1.4';
+const CACHE_NAME = 'vadi-news-cache-v2.1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/style.css?v=2026061703',
+  '/style.css?v=2026061708',
   '/script.js',
   '/images/icon-192.png',
   '/images/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -28,20 +29,26 @@ self.addEventListener('activate', event => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') return;
+  
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
+    fetch(event.request)
+      .then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
-        return fetch(event.request).catch(() => {
-          // Fallback if offline and not in cache
-        });
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request);
       })
   );
 });
