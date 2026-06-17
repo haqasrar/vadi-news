@@ -27,12 +27,19 @@ function applyTheme() {
 let allNewsData = [];
 let currentCategory = 'all';
 
-// --- INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-    loadAllData();
-    setupSearch();
-    checkUrlHash(); // Check for article ID in URL
-});
+// --- HASH ROUTING SYSTEM ---
+window.checkUrlHash = () => {
+    const hash = window.location.hash;
+    console.log("Routing Hash:", hash);
+    if (hash === '#about') {
+        showAboutUs();
+    } else if (hash.startsWith('#article=')) {
+        const artId = hash.split('=')[1];
+        openArticlePage(artId);
+    }
+};
+
+window.addEventListener('hashchange', checkUrlHash);
 
 // --- DATA LOADING ---
 async function loadAllData() {
@@ -125,12 +132,14 @@ window.filterByCategory = (category) => {
     const activeLink = links.find(a => a.innerText.includes(category) || (category === 'all' && a.innerText.includes('Home')));
     if (activeLink) activeLink.classList.add('active');
 
+    // Reset hash if it is not a specific article hash
+    if (window.location.hash && !window.location.hash.startsWith('#article=')) {
+        window.history.pushState("", document.title, window.location.pathname + window.location.search);
+    }
+
     // Logic
     if (category === 'all') {
-        const feedCol = document.querySelector('.news-feed-column');
-        // Restore Home HTML Structure if needed (simplified: just reload clean structure or re-render)
-        // Since we modified innerHTML of feed-column in category view, we need to revert.
-        // Easiest is to reload page or rebuild DOM. For SPA seamlessly:
+        window.location.hash = ''; // Clear hash!
         location.reload(); // Simplest way to restore complex layout grid without managing state of deleted DOM elements.
         return;
     }
@@ -504,10 +513,74 @@ window.shareArticle = async (title, id) => {
 };
 
 
+// About Us Renderer
+window.showAboutUs = () => {
+    // Set active link in nav
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    const aboutLink = Array.from(document.querySelectorAll('.nav-links a')).find(a => a.innerText.includes('About'));
+    if (aboutLink) aboutLink.classList.add('active');
+
+    // Hide Home specific elements
+    document.getElementById('hero-section').style.display = 'none';
+    const videoSec = document.getElementById('video-section');
+    if (videoSec) videoSec.style.display = 'none';
+
+    // Update main feed column
+    const feedCol = document.querySelector('.news-feed-column');
+    if (feedCol) {
+        feedCol.innerHTML = `
+            <div class="about-container">
+                <div class="about-header-3d">
+                    <h2>About Us</h2>
+                    <p class="about-subtitle">The Voice of the Valley</p>
+                </div>
+                
+                <div class="vision-card-3d">
+                    <h3>Our Vision</h3>
+                    <p>Vadi E Kashmir was founded to provide transparent, accurate, and unbiased journalism from the heart of Jammu & Kashmir. We aim to amplify the voices of the valley, bridging the gap between local narratives and the global stage. Our commitment is to truth, integrity, and journalistic excellence.</p>
+                </div>
+
+                <div class="team-section">
+                    <h3>Our Team</h3>
+                    <div class="team-grid-3d">
+                        <div class="member-card-3d">
+                            <div class="member-avatar">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <h4>Faisal Pathan</h4>
+                            <span class="member-role">Founder & Editor-in-Chief</span>
+                            <p class="member-bio">A passionate visionary dedicated to giving a voice to the unheard. Faisal established Vadi E Kashmir to build a reliable media platform focused on grassroots reporting, community empowerment, and honest editorial coverage of Jammu & Kashmir.</p>
+                            <div class="member-socials">
+                                <a href="https://x.com/MrFaisalPathan1" target="_blank"><i class="fab fa-twitter"></i></a>
+                                <a href="https://www.instagram.com/driftsoulkhan/" target="_blank"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+
+                        <div class="member-card-3d">
+                            <div class="member-avatar">
+                                <i class="fas fa-code"></i>
+                            </div>
+                            <h4>Haq Asrar</h4>
+                            <span class="member-role">Lead Developer & Designer</span>
+                            <p class="member-bio">An innovative developer focused on crafting performant, user-centric web applications. Haq designed and built the Vadi E Kashmir platform, integrating modern PWA capabilities, responsive layout architectures, and highly polished visual aesthetics.</p>
+                            <div class="member-socials">
+                                <a href="mailto:contact@vadiekashmir.com"><i class="fas fa-envelope"></i></a>
+                                <a href="tel:+917006942620"><i class="fas fa-phone"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    window.scrollTo(0, 0);
+};
+
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
     loadAllData();
     applyTheme();
+    checkUrlHash(); // Route to appropriate page based on hash
 
     // Search Listener
     const searchInput = document.getElementById('navSearchInput');

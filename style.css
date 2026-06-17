@@ -67,7 +67,9 @@ body.dark-mode {
 
 body {
     font-family: var(--font-body);
+    background: radial-gradient(circle at top right, #ffffff 0%, #f1f5f9 100%);
     background-color: var(--bg-body);
+    background-attachment: fixed;
     color: var(--text-main);
     line-height: 1.6;
     transition: background-color 0.3s, color 0.3s;
@@ -1101,20 +1103,33 @@ button {
 /* Sidebar Widgets */
 .sidebar-widget {
     background: var(--bg-white);
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 14px;
     padding: 1.5rem;
     margin-bottom: 2.5rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 
+        0 10px 30px -10px rgba(0, 0, 0, 0.06),
+        0 2px 5px rgba(0, 0, 0, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.sidebar-widget:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 15px 35px -10px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.08);
 }
 
 .sidebar-widget h3 {
     font-family: var(--font-heading);
-    font-size: 1.2rem;
-    border-bottom: 2px solid var(--border-light);
+    font-size: 1.25rem;
+    font-weight: 700;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.04);
     padding-bottom: 0.8rem;
     margin-bottom: 1.2rem;
-    color: var(--text-main);
+    color: #000080; /* Navy Blue header accent */
     position: relative;
 }
 
@@ -1123,9 +1138,10 @@ button {
     position: absolute;
     bottom: -2px;
     left: 0;
-    width: 40px;
-    height: 2px;
-    background: var(--primary);
+    width: 50px;
+    height: 2.5px;
+    background: linear-gradient(to right, #FF671F, #000080);
+    border-radius: 2px;
 }
 
 .social-grid {
@@ -1141,14 +1157,34 @@ button {
     gap: 10px;
     padding: 12px;
     color: white;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 700;
     font-size: 0.85rem;
-    transition: filter 0.2s;
+    box-shadow: 
+        0 4px 10px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.s-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(rgba(255,255,255,0.15), rgba(255,255,255,0));
+    pointer-events: none;
 }
 
 .s-btn:hover {
-    filter: brightness(1.1);
+    transform: translateY(-3px) scale(1.02);
+    filter: brightness(1.05);
+    box-shadow: 
+        0 8px 18px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .fb {
@@ -1175,26 +1211,28 @@ button {
 
 .tab-headers {
     display: flex;
-    background: #F3F4F6;
+    background: #e2e8f0; /* softer slate border background */
+    padding: 4px;
+    border-radius: 12px 12px 0 0;
 }
 
 .tab-btn {
     flex: 1;
-    padding: 15px;
+    padding: 12px;
     text-align: center;
     font-size: 0.85rem;
     font-weight: 700;
     color: var(--text-muted);
     border: none;
     background: transparent;
-    border-bottom: 3px solid transparent;
-    transition: 0.3s;
+    border-radius: 8px; /* pill shape active state */
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tab-btn.active {
     background: var(--bg-white);
-    color: var(--primary);
-    border-bottom-color: var(--primary);
+    color: #000080; /* navy active text */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .tab-content {
@@ -1690,4 +1728,268 @@ body.dark-mode .brand-logo-center:hover .brand-text-center h1 {
 
 body.dark-mode .brand-text-center .tagline {
     color: #94a3b8;
+}
+
+/* --- ABOUT US PAGE (3D Tricolor Theme) --- */
+.about-container {
+    padding: 1rem 0;
+}
+
+.about-header-3d {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, rgba(255, 103, 31, 0.08) 0%, rgba(4, 106, 56, 0.08) 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 15px 30px rgba(0, 0, 0, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.about-header-3d::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #FF671F;
+}
+
+.about-header-3d::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 4px;
+    height: 100%;
+    background: #046A38;
+}
+
+.about-header-3d h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #000080;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.about-subtitle {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+.vision-card-3d {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 3rem;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.06),
+        0 5px 15px rgba(0, 0, 0, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: perspective(1000px) rotateX(0.5deg);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vision-card-3d:hover {
+    transform: perspective(1000px) rotateX(0deg) translateY(-2px);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.vision-card-3d h3 {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    color: #000080;
+    margin-top: 0;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #FF671F;
+    display: inline-block;
+    padding-bottom: 6px;
+}
+
+.vision-card-3d p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.team-section > h3 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    color: #000080;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.team-grid-3d {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .team-grid-3d {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.member-card-3d {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: perspective(1000px) rotateY(1deg);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.member-card-3d:hover {
+    transform: perspective(1000px) rotateY(0deg) translateY(-5px);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+.member-avatar {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #FF671F 0%, #000080 50%, #046A38 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 2.2rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 8px 16px rgba(0, 0, 80, 0.2);
+    transition: transform 0.4s ease;
+}
+
+.member-card-3d:hover .member-avatar {
+    transform: scale(1.08) rotate(5deg);
+}
+
+.member-card-3d h4 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    margin: 0;
+    color: var(--text-main);
+}
+
+.member-role {
+    font-size: 0.8rem;
+    color: #000080;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    margin-bottom: 1rem;
+    background: rgba(0, 0, 128, 0.06);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.member-bio {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem 0;
+    flex-grow: 1;
+}
+
+.member-socials {
+    display: flex;
+    gap: 15px;
+}
+
+.member-socials a {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #000080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.member-socials a:hover {
+    background: #000080;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(0, 0, 80, 0.2);
+}
+
+/* Dark Mode Overrides for About Us */
+body.dark-mode .about-header-3d {
+    background: linear-gradient(135deg, rgba(255, 103, 31, 0.05) 0%, rgba(4, 106, 56, 0.05) 100%);
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .about-header-3d h2 {
+    color: #e2e8f0;
+}
+
+body.dark-mode .vision-card-3d,
+body.dark-mode .member-card-3d {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .vision-card-3d:hover,
+body.dark-mode .member-card-3d:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+body.dark-mode .vision-card-3d h3,
+body.dark-mode .team-section > h3 {
+    color: #38bdf8;
+}
+
+body.dark-mode .member-role {
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.1);
+}
+
+body.dark-mode .member-socials a {
+    background: #1e293b;
+    color: #38bdf8;
+}
+
+body.dark-mode .member-socials a:hover {
+    background: #38bdf8;
+    color: #0f172a;
 }
